@@ -11,14 +11,14 @@ typedef struct Sprite_S
 {
     int ref_count;
     GFC_TextLine filepath;
-    SDL_Texture *texture;
-    SDL_Surface *surface;
+    SDL_Texture* texture;
+    SDL_Surface* surface;
     Uint32 frames_per_line;
-    Uint32 frame_w,frame_h;
+    Uint32 frame_w, frame_h;
 }Sprite;
 
 /**
- * @brief initializes the sprite manager 
+ * @brief initializes the sprite manager
  * @param max the maximum number of sprites the system will handle at once
  */
 void gf2d_sprite_init(Uint32 max);
@@ -28,14 +28,14 @@ void gf2d_sprite_init(Uint32 max);
  * @param filename the image file to load
  * @returns NULL on error or the sprite loaded
  */
-Sprite *gf2d_sprite_load_image(const char *filename);
+Sprite* gf2d_sprite_load_image(const char* filename);
 
 /**
  * @brief draw a simple image to screen at the position provided
  * @param image the sprite image to draw
  * @param position the x and y position to draw the image at (top left corner)
  */
-void gf2d_sprite_draw_image(Sprite *image,GFC_Vector2D position);
+void gf2d_sprite_draw_image(Sprite* image, GFC_Vector2D position);
 
 /**
  * @brief loads a sprite from file using the sprite system
@@ -45,8 +45,8 @@ void gf2d_sprite_draw_image(Sprite *image,GFC_Vector2D position);
  * @param framesPerLine how many frames go in a row in the sprite sheet
  * @param keepSurface if you plan on doing surface editing with this sprite, set to true otherwise the surface data is cleaned up
  */
-Sprite *gf2d_sprite_load_all(
-    const char *filename,
+Sprite* gf2d_sprite_load_all(
+    const char* filename,
     Sint32 frameWidth,
     Sint32 frameHeigh,
     Sint32 framesPerLine,
@@ -67,14 +67,14 @@ Sprite *gf2d_sprite_load_all(
  * @param frame which frame to draw
  */
 void gf2d_sprite_render(
-    Sprite * sprite,
+    Sprite* sprite,
     GFC_Vector2D position,
-    GFC_Vector2D * scale,
-    GFC_Vector2D * center,
-    float    * rotation,
-    GFC_Vector2D * flip,
-    GFC_Color    * color,
-    GFC_Vector4D * clip,
+    GFC_Vector2D* scale,
+    GFC_Vector2D* center,
+    float* rotation,
+    GFC_Vector2D* flip,
+    GFC_Color* color,
+    GFC_Vector4D* clip,
     Uint32 frame);
 
 /**
@@ -89,13 +89,13 @@ void gf2d_sprite_render(
  * @param frame which frame to draw
  */
 void gf2d_sprite_draw(
-    Sprite * sprite,
+    Sprite* sprite,
     GFC_Vector2D position,
-    GFC_Vector2D * scale,
-    GFC_Vector2D * center,
-    float    * rotation,
-    GFC_Vector2D * flip,
-    GFC_Color    * colorShift,
+    GFC_Vector2D* scale,
+    GFC_Vector2D* center,
+    float* rotation,
+    GFC_Vector2D* flip,
+    GFC_Color* colorShift,
     Uint32 frame);
 
 /**
@@ -103,13 +103,13 @@ void gf2d_sprite_draw(
  * Stays in memory until the space is needed
  * @param sprite the sprite to free
  */
-void gf2d_sprite_free(Sprite *sprite);
+void gf2d_sprite_free(Sprite* sprite);
 
 /**
  * @brief completely removes sprite from memory.  Only use when you know you wont need it again
  * @param sprite the sprite to delete
  */
-void gf2d_sprite_delete(Sprite *sprite);
+void gf2d_sprite_delete(Sprite* sprite);
 
 /**
  * @brief delete all loaded sprites from memory
@@ -128,12 +128,12 @@ void gf2d_sprite_clear_all();
  * @param surface the surface to draw to
  */
 void gf2d_sprite_draw_to_surface(
-    Sprite *sprite,
+    Sprite* sprite,
     GFC_Vector2D position,
-    GFC_Vector2D * scale,
-    GFC_Vector2D * scaleCenter,
+    GFC_Vector2D* scale,
+    GFC_Vector2D* scaleCenter,
     Uint32 frame,
-    SDL_Surface *surface
+    SDL_Surface* surface
 );
 
 /**
@@ -141,7 +141,7 @@ void gf2d_sprite_draw_to_surface(
  * @note both texture and sprite data is left blank
  * @return NULL on error or out of memory, a blank sprite otherwise
  */
-Sprite *gf2d_sprite_new();
+Sprite* gf2d_sprite_new();
 
 
 #endif

@@ -14,14 +14,14 @@
  * @param color the color to draw with
  * @param offset a positional offset to draw the space at
  */
-void gf2d_draw_shape(GFC_Shape shape,GFC_Color color,GFC_Vector2D offset);
+void gf2d_draw_shape(GFC_Shape shape, GFC_Color color, GFC_Vector2D offset);
 
 /**
  * @brief draw a pixel to the current rendering context
  * @param pixel the screen position to draw at
  * @param color the color to draw with
  */
-void gf2d_draw_pixel(GFC_Vector2D pixel,GFC_Color color);
+void gf2d_draw_pixel(GFC_Vector2D pixel, GFC_Color color);
 
 /**
  * @brief draw a circle outline
@@ -36,14 +36,14 @@ void gf2d_draw_circle(GFC_Vector2D center, int radius, GFC_Color color);
  * @param rect the rect to draw
  * @param color the color to draw with
  */
-void gf2d_draw_rect(GFC_Rect rect,GFC_Color color);
+void gf2d_draw_rect(GFC_Rect rect, GFC_Color color);
 
 /**
  * @brief draw a solid rectanlge
  * @param rect the rect to draw
  * @param color the color to draw with
  */
-void gf2d_draw_rect_filled(GFC_Rect rect,GFC_Color color);
+void gf2d_draw_rect_filled(GFC_Rect rect, GFC_Color color);
 
 /**
  * @brief draw a diamon shape centered around a point
@@ -59,7 +59,7 @@ void gf2d_draw_diamond(GFC_Vector2D center, int radius, GFC_Color color);
  * @param p2 ending point
  * @param color the color to draw with
  */
-void gf2d_draw_line(GFC_Vector2D p1,GFC_Vector2D p2, GFC_Color color);
+void gf2d_draw_line(GFC_Vector2D p1, GFC_Vector2D p2, GFC_Color color);
 
 /**
  * @brief use the bezier algorithm to render a curve
@@ -68,7 +68,7 @@ void gf2d_draw_line(GFC_Vector2D p1,GFC_Vector2D p2, GFC_Color color);
  * @param p2 ending point
  * @param color rendering color
  */
-void gf2d_draw_bezier_curve(GFC_Vector2D p0, GFC_Vector2D p1, GFC_Vector2D p2,GFC_Color color);
+void gf2d_draw_bezier_curve(GFC_Vector2D p0, GFC_Vector2D p1, GFC_Vector2D p2, GFC_Color color);
 
 /**
  * @brief draw a 4 point bezier curve given two end points and two reference points
@@ -78,7 +78,7 @@ void gf2d_draw_bezier_curve(GFC_Vector2D p0, GFC_Vector2D p1, GFC_Vector2D p2,GF
  * @param r1 second reference point
  * @param color rendering color
  */
-void gf2d_draw_bezier4_curve(GFC_Vector2D p0,GFC_Vector2D r0,GFC_Vector2D r1,GFC_Vector2D p1,GFC_Color color);
+void gf2d_draw_bezier4_curve(GFC_Vector2D p0, GFC_Vector2D r0, GFC_Vector2D r1, GFC_Vector2D p1, GFC_Color color);
 
 /**
  * @brief draw a closed polygon described by the list of GFC_Vector2D points provided
@@ -86,6 +86,6 @@ void gf2d_draw_bezier4_curve(GFC_Vector2D p0,GFC_Vector2D r0,GFC_Vector2D r1,GFC
  * @param p2 ending point
  * @param color the color to draw with
  */
-void gf2d_draw_polygon(GFC_List *points,GFC_Color color);
+void gf2d_draw_polygon(GFC_List* points, GFC_Color color);
 
 #endif

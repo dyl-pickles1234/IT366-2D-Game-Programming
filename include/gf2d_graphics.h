@@ -17,7 +17,7 @@
  * @param fullscreen if you want the window to render full screen or not
  */
 void gf2d_graphics_initialize(
-    char *windowName,
+    char* windowName,
     int viewWidth,
     int viewHeight,
     int renderWidth,
@@ -47,7 +47,7 @@ GFC_Vector2D gf2d_graphics_get_resolution();
  * @brief get the current rendering context
  * @return NULL on error or the current rendering context
  */
-SDL_Renderer *gf2d_graphics_get_renderer();
+SDL_Renderer* gf2d_graphics_get_renderer();
 
 /**
  * @brief set the blend mode for the next draw calls (until this is changed)
@@ -90,7 +90,7 @@ Uint32 gf2d_graphics_get_image_format();
  * @param h the height of the surface to create
  * @return NULL on error or the SDL_Surface created
  */
-SDL_Surface *gf2d_graphics_create_surface(Uint32 w,Uint32 h);
+SDL_Surface* gf2d_graphics_create_surface(Uint32 w, Uint32 h);
 
 /**
  * @brief draw a surface to the current drawing context
@@ -98,27 +98,27 @@ SDL_Surface *gf2d_graphics_create_surface(Uint32 w,Uint32 h);
  * @param srcRect the clip rect to draw from (if NULL, whole surface is used)
  * @param dstRect the position data of the rext is used for the destination position
  */
-void gf2d_graphics_blit_surface_to_screen(SDL_Surface *surface,const SDL_Rect * srcRect,SDL_Rect * dstRect);
+void gf2d_graphics_blit_surface_to_screen(SDL_Surface* surface, const SDL_Rect* srcRect, SDL_Rect* dstRect);
 
 /**
  * @brief convert an SDL Surface to the format compatible with the rendering context
  * @param surface a pointer to your surface pointer.  The surface is automatically freed upon success
  * @returns NULL on error, or the new SDL Surface upon success
  */
-SDL_Surface *gf2d_graphics_screen_convert(SDL_Surface **surface);
+SDL_Surface* gf2d_graphics_screen_convert(SDL_Surface** surface);
 
 /**
  * @brief convert the texture texture target into an SDL surface.
  * @note: this is slow don't do this often
  * @return NULL on no texture target or error.  A surface otherwise
  */
-SDL_Surface *gf2d_graphics_get_render();
+SDL_Surface* gf2d_graphics_get_render();
 
 /**
  * @brief save the last render to a PNG
  * @param filename the filepath and name of the screenshot to save
  */
-void gf2d_graphics_save_screenshot(const char *filename);
+void gf2d_graphics_save_screenshot(const char* filename);
 
 
 
