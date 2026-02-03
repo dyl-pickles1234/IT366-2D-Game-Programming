@@ -67,7 +67,7 @@ void entity_draw(Entity* ent) {
         ent->sprite,
         ent->pos,
         &ent->scale,
-        NULL,
+        &ent->center,
         &ent->rotation,
         NULL,
         NULL,
@@ -81,5 +81,27 @@ void entity_manager_draw_all() {
         if (!entityManager.entityList[i]._inuse) continue;
 
         entity_draw(&entityManager.entityList[i]);
+    }
+}
+
+void entity_manager_think_all() {
+    if (!entityManager.entityList) { slog("Entity manager not initialized"); return; }
+
+    for (int i = 0; i < entityManager.maxEntities; i++) {
+        if (!entityManager.entityList[i]._inuse) continue;
+        if (!entityManager.entityList[i].think) continue;
+
+        entityManager.entityList[i].think(&entityManager.entityList[i]);
+    }
+}
+
+void entity_manager_update_all() {
+    if (!entityManager.entityList) { slog("Entity manager not initialized"); return; }
+
+    for (int i = 0; i < entityManager.maxEntities; i++) {
+        if (!entityManager.entityList[i]._inuse) continue;
+        if (!entityManager.entityList[i].update) continue;
+
+        entityManager.entityList[i].update(&entityManager.entityList[i]);
     }
 }

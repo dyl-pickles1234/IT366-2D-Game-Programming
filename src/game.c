@@ -1,6 +1,8 @@
 #include <SDL.h>
 #include "simple_logger.h"
 
+#include "gfc_input.h"
+
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 
@@ -30,6 +32,7 @@ int main(int argc, char* argv[])
         720,
         gfc_vector4d(0, 0, 0, 255),
         0);
+    gfc_input_init("config/input.cfg");
     gf2d_graphics_set_frame_delay(16);
     gf2d_sprite_init(1024);
     entity_manager_init(1024);
@@ -47,10 +50,16 @@ int main(int argc, char* argv[])
     {
         SDL_PumpEvents();   // update SDL's internal event structures
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
+
         /*update things here*/
+        gfc_input_update();
+
         SDL_GetMouseState(&mx, &my);
         mf += 0.1;
         if (mf >= 16.0)mf = 0;
+
+        entity_manager_think_all();
+        entity_manager_update_all();
 
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
