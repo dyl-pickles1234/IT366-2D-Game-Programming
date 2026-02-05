@@ -6,6 +6,7 @@
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 
+#include "camera.h"
 #include "entity.h"
 #include "player.h"
 
@@ -16,7 +17,6 @@ int main(int argc, char* argv[])
     /*variable declarations*/
     int done = 0;
     const Uint8* keys;
-    Sprite* sprite;
 
     int mx, my;
     float mf = 0;
@@ -40,8 +40,9 @@ int main(int argc, char* argv[])
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
+    camera_set_dimension(gfc_vector2d(100, 100));
+
     /*demo setup*/
-    sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
 
     Level* level = level_create(

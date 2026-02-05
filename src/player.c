@@ -2,6 +2,7 @@
 
 #include "gfc_input.h"
 
+#include "camera.h"
 #include "player.h"
 
 static Entity* player = NULL;
@@ -51,4 +52,6 @@ void player_update(Entity* player) {
     gfc_vector2d_add(player->pos, player->pos, player->vel);
 
     if (player->vel.x || player->vel.y) player->rotation = gfc_vector2d_angle(player->vel) * GFC_RADTODEG;
+
+    camera_center_on(player->pos);
 }

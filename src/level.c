@@ -1,5 +1,6 @@
 #include "simple_logger.h"
 
+#include "camera.h"
 #include "level.h"
 
 Level* level_new() {
@@ -92,9 +93,11 @@ void level_draw(Level* level) {
                 if (index < 0) continue;
                 tile = level->tilemap[index];
                 if (!tile) continue;
+                GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth, j * level->tileHeight);
+                gfc_vector2d_add(pos, pos, camera_get_offset());
                 gf2d_sprite_draw(
                     level->tileset,
-                    gfc_vector2d(i * level->tileWidth, j * level->tileHeight),
+                    pos,
                     NULL,
                     NULL,
                     NULL,

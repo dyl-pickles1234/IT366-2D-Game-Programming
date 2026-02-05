@@ -1,5 +1,6 @@
 #include "simple_logger.h"
 
+#include "camera.h"
 #include "entity.h"
 
 typedef struct {
@@ -63,9 +64,12 @@ void entity_free(Entity* self) {
 void entity_draw(Entity* ent) {
     if (!ent) return;
 
+    GFC_Vector2D pos;
+    gfc_vector2d_add(pos, ent->pos, camera_get_offset());
+
     gf2d_sprite_draw(
         ent->sprite,
-        ent->pos,
+        pos,
         &ent->scale,
         &ent->center,
         &ent->rotation,
