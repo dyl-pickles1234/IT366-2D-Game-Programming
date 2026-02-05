@@ -9,6 +9,8 @@
 #include "entity.h"
 #include "player.h"
 
+#include "level.h"
+
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
@@ -42,6 +44,19 @@ int main(int argc, char* argv[])
     sprite = gf2d_sprite_load_image("images/backgrounds/bg_flat.png");
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
 
+    Level* level = level_create(
+        "images/backgrounds/bg_flat.png",
+        "images/tiles/tileset_flat.png",
+        32,
+        32,
+        1,
+        40,
+        40
+    );
+
+    if (!level) { slog("bad level"); return 1; }
+    level_add_border(level, 1);
+
     player_entity_new(gfc_vector2d(100, 100));
 
     slog("press [escape] to quit");
@@ -64,7 +79,9 @@ int main(int argc, char* argv[])
         gf2d_graphics_clear_screen();// clears drawing buffers
         // all drawing should happen betweem clear_screen and next_frame
             //backgrounds drawn first
-        gf2d_sprite_draw_image(sprite, gfc_vector2d(0, 0));
+        // gf2d_sprite_draw_image(sprite, gfc_vector2d(0, 0));
+
+        level_draw(level);
 
         entity_manager_draw_all();
 
