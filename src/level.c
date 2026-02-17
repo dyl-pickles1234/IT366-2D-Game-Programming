@@ -46,6 +46,9 @@ Level* level_create(const char* bg, const char* tileset, Uint32 tileWidth, Uint3
     level->height = height;
     level->tileWidth = tileWidth;
     level->tileHeight = tileHeight;
+
+    camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
+
     return level;
 }
 
@@ -62,17 +65,19 @@ void level_add_border(Level* level, Uint8 tile) {
 
     int index;
 
+    // fill in top/bottom rows
+    for (int i = 0; i < level->width; i++) {
+        index = level_get_tile_index(level, i, 0);
+        if (index >= 0) level->tilemap[index] = tile;
+        index = level_get_tile_index(level, i, level->height - 1);
+        if (index >= 0) level->tilemap[index] = tile;
+    }
+
+    // fill in left/right columns
     for (int j = 0; j < level->height; j++) {
         index = level_get_tile_index(level, 0, j);
         if (index >= 0) level->tilemap[index] = tile;
         index = level_get_tile_index(level, level->width - 1, j);
-        if (index >= 0) level->tilemap[index] = tile;
-    }
-
-    for (int i = 0; i < level->height; i++) {
-        index = level_get_tile_index(level, 0, i);
-        if (index >= 0) level->tilemap[index] = tile;
-        index = level_get_tile_index(level, level->width - 1, i);
         if (index >= 0) level->tilemap[index] = tile;
     }
 }
@@ -87,18 +92,22 @@ void level_draw(Level* level) {
     if (level->tileset) {
         int index;
         Uint8 tile;
+        GFC_Vector2D scale = camera_get_zoom();
+
         for (int j = 0; j < level->height; j++) {
             for (int i = 0; i < level->width; i++) {
                 index = level_get_tile_index(level, i, j);
                 if (index < 0) continue;
                 tile = level->tilemap[index];
                 if (!tile) continue;
-                GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth, j * level->tileHeight);
-                gfc_vector2d_add(pos, pos, camera_get_offset());
+                GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth * scale.x, j * level->tileHeight * scale.y);
+                GFC_Vector2D offset = camera_get_offset();
+                offset = gfc_vector2d_multiply(offset, scale);
+                gfc_vector2d_add(pos, pos, offset);
                 gf2d_sprite_draw(
                     level->tileset,
                     pos,
-                    NULL,
+                    &scale,
                     NULL,
                     NULL,
                     NULL,

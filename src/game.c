@@ -40,7 +40,8 @@ int main(int argc, char* argv[])
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
-    camera_set_dimension(gfc_vector2d(100, 100));
+    camera_set_dimension(gfc_vector2d(1200, 720));
+    camera_set_zoom(1);
 
     /*demo setup*/
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
@@ -51,8 +52,8 @@ int main(int argc, char* argv[])
         32,
         32,
         1,
-        40,
-        40
+        48,
+        24
     );
 
     if (!level) { slog("bad level"); return 1; }
@@ -98,6 +99,9 @@ int main(int argc, char* argv[])
             (int)mf);
 
         gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
+
+        if (keys[SDL_SCANCODE_UP]) camera_set_zoom(camera_get_zoom().x + 0.01);
+        if (keys[SDL_SCANCODE_DOWN]) camera_set_zoom(camera_get_zoom().x - 0.01);
 
         if (keys[SDL_SCANCODE_LCTRL] && keys[SDL_SCANCODE_Q])done = 1; // exit condition (lctrl+q)
         //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());

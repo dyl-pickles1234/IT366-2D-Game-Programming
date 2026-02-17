@@ -65,12 +65,18 @@ void entity_draw(Entity* ent) {
     if (!ent) return;
 
     GFC_Vector2D pos;
+    GFC_Vector2D scale = camera_get_zoom();
+
     gfc_vector2d_add(pos, ent->pos, camera_get_offset());
+    pos = gfc_vector2d_multiply(pos, scale);
+
+    scale.x *= ent->scale.x;
+    scale.y *= ent->scale.y;
 
     gf2d_sprite_draw(
         ent->sprite,
         pos,
-        &ent->scale,
+        &scale,
         &ent->center,
         &ent->rotation,
         NULL,
