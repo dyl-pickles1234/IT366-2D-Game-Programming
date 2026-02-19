@@ -8,6 +8,7 @@
 
 #include "camera.h"
 #include "entity.h"
+#include "monster.h"
 #include "player.h"
 
 #include "level.h"
@@ -61,6 +62,8 @@ int main(int argc, char* argv[])
 
     player_entity_new(gfc_vector2d(100, 100));
 
+    monster_new(gfc_vector2d(200, 250));
+
     slog("press [escape] to quit");
     /*main game loop*/
     while (!done)
@@ -70,6 +73,10 @@ int main(int argc, char* argv[])
 
         /*update things here*/
         gfc_input_update();
+
+        if (gfc_input_key_down("k")) {
+            monster_new(gfc_vector2d(gfc_random() * 1200, gfc_random() * 720));
+        }
 
         SDL_GetMouseState(&mx, &my);
         mf += 0.1;
