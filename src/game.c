@@ -47,19 +47,18 @@ int main(int argc, char* argv[])
     /*demo setup*/
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
 
-    Level* level = level_create(
-        "images/backgrounds/bg_flat.png",
-        "images/tiles/tileset_flat.png",
-        32,
-        32,
-        1,
-        48,
-        24
-    );
+    // Level* level = level_create(
+    //     "images/backgrounds/bg_flat.png",
+    //     "images/tiles/tileset_flat.png",
+    //     32,
+    //     32,
+    //     1,
+    //     48,
+    //     24
+    // );
+    Level* level = level_load("levels/testLevel.json");
 
     if (!level) { slog("bad level"); return 1; }
-    level_add_border(level, 1);
-
     player_entity_new(gfc_vector2d(100, 100));
 
     monster_new(gfc_vector2d(200, 250));
@@ -77,6 +76,8 @@ int main(int argc, char* argv[])
         if (gfc_input_key_down("k")) {
             monster_new(gfc_vector2d(gfc_random() * 1200, gfc_random() * 720));
         }
+
+        if (gfc_input_key_down("l")) level = level_load("levels/testLevel.json");
 
         SDL_GetMouseState(&mx, &my);
         mf += 0.1;

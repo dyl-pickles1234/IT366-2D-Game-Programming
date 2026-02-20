@@ -1,4 +1,5 @@
 #include "simple_logger.h"
+#include "simple_json.h"
 
 #include "camera.h"
 #include "level.h"
@@ -23,31 +24,95 @@ void level_free(Level* level) {
     free(level);
 }
 
-Level* level_create(const char* bg, const char* tileset, Uint32 tileWidth, Uint32 tileHeight, Uint32 tilesPerLine, Uint32 width, Uint32 height) {
+// Level* level_create(const char* bg, const char* tileset, Uint32 tileWidth, Uint32 tileHeight, Uint32 tilesPerLine, Uint32 width, Uint32 height) {
+//     Level* level = level_new();
+//     if (!level) return NULL;
+//     if (!width || !height) { slog("Can't make a level without tilemap dimensions"); return NULL; }
+
+//     if (bg) {
+//         level->bg = gf2d_sprite_load_image(bg);
+//     }
+
+//     if (tileset) {
+//         level->tileset = gf2d_sprite_load_all(
+//             tileset,
+//             tileWidth,
+//             tileHeight,
+//             tilesPerLine,
+//             true);
+//     }
+
+//     level->tilemap = gfc_allocate_array(sizeof(Uint8), width * height);
+//     level->width = width;
+//     level->height = height;
+//     level->tileWidth = tileWidth;
+//     level->tileHeight = tileHeight;
+
+//     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
+
+//     return level;
+// }
+
+Level* level_load(const char* filepath) {
     Level* level = level_new();
     if (!level) return NULL;
-    if (!width || !height) { slog("Can't make a level without tilemap dimensions"); return NULL; }
 
-    if (bg) {
-        level->bg = gf2d_sprite_load_image(bg);
-    }
+    // level's base JSON
+    SJson* levelConfigFile = sj_load(filepath);
+    SJson* levelConfig = sj_object_get_value(levelConfigFile, "level");
 
-    if (tileset) {
-        level->tileset = gf2d_sprite_load_all(
-            tileset,
-            tileWidth,
-            tileHeight,
-            tilesPerLine,
-            true);
-    }
+    // each property in level (SJson)
+    SJson* bgJson = sj_object_get_value(levelConfig, "background");
+    SJson* tilesetJson = sj_object_get_value(levelConfig, "tileset");
+    SJson* tilesheetJson = sj_object_get_value(tilesetJson, "tilesheet");
+    SJson* tileWidthJson = sj_object_get_value(tilesetJson, "width");
+    SJson* tileHeightJson = sj_object_get_value(tilesetJson, "height");
+    SJson* tilesPerRowJson = sj_object_get_value(tilesetJson, "tilesPerRow");
+    SJson* tilemapJson = sj_object_get_value(levelConfig, "tilemap");
+    SJson* tilemapFirstRowJson = sj_array_get_nth(tilemapJson, 0);
 
-    level->tilemap = gfc_allocate_array(sizeof(Uint8), width * height);
+    // pull out the actual values from JSON
+    const char* bgFilename = sj_get_string_value(bgJson);
+    const char* tilesheetFilename = sj_get_string_value(tilesheetJson);
+    int width, height, tileWidth, tileHeight, tilesPerRow;
+
+    sj_get_integer_value(tileWidthJson, &tileWidth);
+    sj_get_integer_value(tileHeightJson, &tileHeight);
+    sj_get_integer_value(tilesPerRowJson, &tilesPerRow);
+
+    width = sj_array_get_count(tilemapFirstRowJson);
+    height = sj_array_get_count(tilemapJson);
+
+    // configure level with all the loaded info!
+    level->bg = gf2d_sprite_load_image(bgFilename);
+    level->tileset = gf2d_sprite_load_all(
+        tilesheetFilename,
+        tileWidth,
+        tileHeight,
+        tilesPerRow,
+        true);
     level->width = width;
     level->height = height;
     level->tileWidth = tileWidth;
     level->tileHeight = tileHeight;
+    level->tilemap = gfc_allocate_array(sizeof(Uint8), width * height);
+
+    // fill in the tilemap
+    int index, tileValue;
+    SJson* rowJson, * tileJson;
+    for (int j = 0; j < height; j++) {
+        rowJson = sj_array_get_nth(tilemapJson, j);
+        for (int i = 0; i < width; i++) {
+            tileJson = sj_array_get_nth(rowJson, i);
+            index = level_get_tile_index(level, i, j);
+            sj_get_integer_value(tileJson, &tileValue);
+            level->tilemap[index] = tileValue;
+        }
+    }
 
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
+
+    sj_free(levelConfigFile);
 
     return level;
 }
@@ -58,28 +123,6 @@ int level_get_tile_index(Level* level, Uint32 x, Uint32 y) {
     if (y >= level->height) return -1;
 
     return y * level->width + x;
-}
-
-void level_add_border(Level* level, Uint8 tile) {
-    if (!level || !level->tilemap) return;
-
-    int index;
-
-    // fill in top/bottom rows
-    for (int i = 0; i < level->width; i++) {
-        index = level_get_tile_index(level, i, 0);
-        if (index >= 0) level->tilemap[index] = tile;
-        index = level_get_tile_index(level, i, level->height - 1);
-        if (index >= 0) level->tilemap[index] = tile;
-    }
-
-    // fill in left/right columns
-    for (int j = 0; j < level->height; j++) {
-        index = level_get_tile_index(level, 0, j);
-        if (index >= 0) level->tilemap[index] = tile;
-        index = level_get_tile_index(level, level->width - 1, j);
-        if (index >= 0) level->tilemap[index] = tile;
-    }
 }
 
 void level_draw(Level* level) {

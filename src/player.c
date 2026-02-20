@@ -7,11 +7,11 @@
 
 static Entity* player = NULL;
 
-Entity* player_entity_new(GFC_Vector2D pos) {
+void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
     self = entity_new();
 
-    if (!self) { slog("failed to create entity for player"); return NULL; }
+    if (!self) { slog("failed to create entity for player"); return; }
 
     self->sprite = gf2d_sprite_load_all(
         "images/ed210_top.png",
@@ -27,10 +27,10 @@ Entity* player_entity_new(GFC_Vector2D pos) {
 
     self->speed = 3;
 
-    return self;
+    player = self;
 }
 
-void player_think(Entity* player) {
+void player_think() {
     if (!player) return;
 
     GFC_Vector2D move = { 0 };
@@ -44,7 +44,7 @@ void player_think(Entity* player) {
     player->vel = move;
 }
 
-void player_update(Entity* player) {
+void player_update() {
     if (!player) return;
 
     gfc_vector2d_normalize(&player->vel);

@@ -2,8 +2,6 @@
 
 #include "monster.h"
 
-static Entity* monster = NULL;
-
 Entity* monster_new(GFC_Vector2D pos) {
     Entity* self;
     self = entity_new();

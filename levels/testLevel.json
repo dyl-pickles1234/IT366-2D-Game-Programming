@@ -6,7 +6,8 @@
         {
             "tilesheet": "images/tiles/tileset_flat.png",
             "width": 32,
-            "height": 32
+            "height": 32,
+            "tilesPerRow": 1
         },
         "tilemap":
         [
