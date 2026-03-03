@@ -4,6 +4,8 @@
 #include "camera.h"
 #include "level.h"
 
+static Level* theLevel = NULL;
+
 Level* level_new() {
     Level* level;
 
@@ -123,6 +125,36 @@ int level_get_tile_index(Level* level, Uint32 x, Uint32 y) {
     if (y >= level->height) return -1;
 
     return y * level->width + x;
+}
+
+void level_set(Level* level) {
+    theLevel = level;
+}
+
+Level* level_get() {
+    return theLevel;
+}
+
+Uint8 level_test_rect(Level* level, GFC_Rect playerRect) {
+    int index;
+
+    for (int j = 0; j < level->height; j++) {
+        for (int i = 0; i < level->width; i++) {
+            index = level_get_tile_index(level, i, j);
+            if (index < 0) continue;
+            if (level->tilemap[index] == 0) continue;
+
+            GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth, j * level->tileHeight);
+            GFC_Rect tileRect = { pos.x, pos.y, level->tileWidth, level->tileHeight };
+
+            if (gfc_rect_overlap(playerRect, tileRect)) {
+                slog("contacted tile %i %i", i, j);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 void level_draw(Level* level) {

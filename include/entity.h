@@ -12,6 +12,7 @@ typedef struct Entity_s {
     GFC_Vector2D pos;
     GFC_Vector2D vel;
     float speed;
+    Uint8 onGround;
     GFC_Vector2D scale;
     GFC_Vector2D center;
     float rotation;

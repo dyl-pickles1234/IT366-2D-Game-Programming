@@ -13,6 +13,9 @@
 
 #include "level.h"
 
+#define SCREEN_X 1200
+#define SCREEN_Y 768
+
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
@@ -29,10 +32,10 @@ int main(int argc, char* argv[])
     slog("---==== BEGIN ====---");
     gf2d_graphics_initialize(
         "gf2d",
-        1200,
-        720,
-        1200,
-        720,
+        SCREEN_X,
+        SCREEN_Y,
+        SCREEN_X,
+        SCREEN_Y,
         gfc_vector4d(0, 0, 0, 255),
         0);
     gfc_input_init("config/input.cfg");
@@ -41,8 +44,9 @@ int main(int argc, char* argv[])
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
 
-    camera_set_dimension(gfc_vector2d(1200, 720));
-    camera_set_zoom(1);
+    camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
+    camera_set_zoom(3);
+    // camera_set_zoom(1);
 
     /*demo setup*/
     mouse = gf2d_sprite_load_all("images/pointer.png", 32, 32, 16, 0);
@@ -57,27 +61,25 @@ int main(int argc, char* argv[])
     //     24
     // );
     Level* level = level_load("levels/testLevel.json");
-
     if (!level) { slog("bad level"); return 1; }
+    level_set(level);
+
     player_entity_new(gfc_vector2d(100, 100));
 
     monster_new(gfc_vector2d(200, 250));
 
     slog("press [escape] to quit");
+
     /*main game loop*/
     while (!done)
     {
-        SDL_PumpEvents();   // update SDL's internal event structures
-        keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
-
         /*update things here*/
         gfc_input_update();
+        keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
 
         if (gfc_input_key_down("k")) {
-            monster_new(gfc_vector2d(gfc_random() * 1200, gfc_random() * 720));
+            monster_new(gfc_vector2d(gfc_random() * SCREEN_X, gfc_random() * SCREEN_Y));
         }
-
-        if (gfc_input_key_down("l")) level = level_load("levels/testLevel.json");
 
         SDL_GetMouseState(&mx, &my);
         mf += 0.1;

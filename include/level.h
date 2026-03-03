@@ -35,6 +35,10 @@ Level* level_new();
  */
 Level* level_load(const char* filepath);
 
+void level_set(Level* level);
+
+Level* level_get();
+
 /**
  * @brief for a level, get index of tilemap for a tile's coords
  * @param level pointer to level
@@ -43,6 +47,8 @@ Level* level_load(const char* filepath);
  * @return -1 if level is bad or coords are outside of map, index otherwise
  */
 int level_get_tile_index(Level* level, Uint32 x, Uint32 y);
+
+Uint8 level_test_rect(Level* level, GFC_Rect hitbox);
 
 /**
  * @brief free a level
