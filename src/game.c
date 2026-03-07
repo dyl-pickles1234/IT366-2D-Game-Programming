@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     SDL_ShowCursor(SDL_DISABLE);
 
     camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
-    camera_set_zoom(3);
+    camera_set_zoom(2);
     // camera_set_zoom(1);
 
     /*demo setup*/
@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     if (!level) { slog("bad level"); return 1; }
     level_set(level);
 
-    player_entity_new(gfc_vector2d(100, 100));
+    player_entity_new(gfc_vector2d(100, 400));
 
     monster_new(gfc_vector2d(200, 250));
 
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
         if (keys[SDL_SCANCODE_DOWN]) camera_set_zoom(camera_get_zoom().x - 0.01);
 
         if (keys[SDL_SCANCODE_LCTRL] && keys[SDL_SCANCODE_Q])done = 1; // exit condition (lctrl+q)
-        //slog("Rendering at %f FPS",gf2d_graphics_get_frames_per_second());
+        // slog("Rendering at %f FPS", gf2d_graphics_get_frames_per_second());
     }
     slog("---==== END ====---");
     return 0;

@@ -9,6 +9,7 @@ typedef struct {
     Uint8* tilemap; // pointer to tilemap data
     Uint32 width, height; // size of tilemap
     Uint32 tileWidth, tileHeight; // size of tile
+    float speed;
 } Level;
 
 /**

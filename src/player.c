@@ -7,6 +7,10 @@
 
 #include "player.h"
 
+#define PLAYER_SPEED 1
+#define PLAYER_JUMP_SPEED 5.3
+#define PLAYER_GRAVITY 0.2
+
 static Entity* player = NULL;
 
 void player_entity_new(GFC_Vector2D pos) {
@@ -28,7 +32,7 @@ void player_entity_new(GFC_Vector2D pos) {
     self->think = player_think;
     self->update = player_update;
 
-    self->speed = 1.5;
+    self->speed = PLAYER_SPEED;
 
     player = self;
 }
@@ -41,9 +45,10 @@ void player_think() {
     move.x += player->speed * gfc_input_key_down("d");
     move.x -= player->speed * gfc_input_key_down("a");
 
-    player->vel.x = move.x;
+    player->vel.x = level_get()->speed + move.x;
 
-    if (level_test_rect(level_get(), gfc_rect(player->pos.x - 16, player->pos.y - 15, 31, 31))) {
+    int testGround = level_test_rect(level_get(), gfc_rect(player->pos.x - 16, player->pos.y - 15, 31, 31));
+    if (testGround && testGround != 3) {
         player->onGround = 1;
     }
     else {
@@ -51,7 +56,7 @@ void player_think() {
     }
 
     if (gfc_input_key_down(" ") && player->onGround) {
-        player->vel.y = -5;
+        player->vel.y = -PLAYER_JUMP_SPEED;
     }
 
 }
@@ -59,15 +64,20 @@ void player_think() {
 void player_update() {
     if (!player) return;
 
-    // apply gravity
-    player->vel.y += 0.2;
+    // slog("player - pos: %f %f   vel: %f %f", player->pos.x, player->pos.y - 465.0f, player->vel.x, player->vel.y);
 
-    if (level_test_rect(level_get(), gfc_rect(player->pos.x - 16 + player->vel.x, player->pos.y - 16, 31, 31))) {
+    int testH = level_test_rect(level_get(), gfc_rect(player->pos.x - 16 + player->vel.x, player->pos.y - 16, 31, 31));
+    int testV = level_test_rect(level_get(), gfc_rect(player->pos.x - 16, player->pos.y - 16 + player->vel.y, 31, 31));
+
+    if (testH) {
         player->vel.x = 0;
         player->pos.x = 100;
     }
 
-    if (level_test_rect(level_get(), gfc_rect(player->pos.x - 16, player->pos.y - 16 + player->vel.y, 31, 31))) {
+    if (testV) {
+        if (testV == 3) { // hit spike
+            player->pos.x = 100;
+        }
         player->vel.y = 0;
     }
 
@@ -75,5 +85,10 @@ void player_update() {
 
     if (player->vel.x || player->vel.y) player->rotation = gfc_vector2d_angle(player->vel) * GFC_RADTODEG;
 
-    camera_center_on(player->pos);
+    // apply gravity
+    player->vel.y += PLAYER_GRAVITY;
+
+    GFC_Vector2D cameraFocus = player->pos;
+    cameraFocus.y += 50;
+    camera_center_on(cameraFocus);
 }

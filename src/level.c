@@ -70,6 +70,7 @@ Level* level_load(const char* filepath) {
     SJson* tileWidthJson = sj_object_get_value(tilesetJson, "width");
     SJson* tileHeightJson = sj_object_get_value(tilesetJson, "height");
     SJson* tilesPerRowJson = sj_object_get_value(tilesetJson, "tilesPerRow");
+    SJson* speedJson = sj_object_get_value(levelConfig, "speed");
     SJson* tilemapJson = sj_object_get_value(levelConfig, "tilemap");
     SJson* tilemapFirstRowJson = sj_array_get_nth(tilemapJson, 0);
 
@@ -77,10 +78,12 @@ Level* level_load(const char* filepath) {
     const char* bgFilename = sj_get_string_value(bgJson);
     const char* tilesheetFilename = sj_get_string_value(tilesheetJson);
     int width, height, tileWidth, tileHeight, tilesPerRow;
+    float speed;
 
     sj_get_integer_value(tileWidthJson, &tileWidth);
     sj_get_integer_value(tileHeightJson, &tileHeight);
     sj_get_integer_value(tilesPerRowJson, &tilesPerRow);
+    sj_get_float_value(speedJson, &speed);
 
     width = sj_array_get_count(tilemapFirstRowJson);
     height = sj_array_get_count(tilemapJson);
@@ -97,6 +100,7 @@ Level* level_load(const char* filepath) {
     level->height = height;
     level->tileWidth = tileWidth;
     level->tileHeight = tileHeight;
+    level->speed = speed;
     level->tilemap = gfc_allocate_array(sizeof(Uint8), width * height);
 
     // fill in the tilemap
@@ -144,12 +148,19 @@ Uint8 level_test_rect(Level* level, GFC_Rect playerRect) {
             if (index < 0) continue;
             if (level->tilemap[index] == 0) continue;
 
-            GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth, j * level->tileHeight);
-            GFC_Rect tileRect = { pos.x, pos.y, level->tileWidth, level->tileHeight };
+            GFC_Vector2D pos = gfc_vector2d(i * level->tileWidth, j * level->tileHeight);;
+            GFC_Rect tileRect = { 0 };
+
+            if (level->tilemap[index] == 3) { // spike
+                tileRect = gfc_rect(pos.x + ((32 / 5) * 2), pos.y + (32 / 4), (32 / 5), (32 / 2));
+            }
+            else {
+                tileRect = gfc_rect(pos.x, pos.y, level->tileWidth, level->tileHeight);
+            }
 
             if (gfc_rect_overlap(playerRect, tileRect)) {
-                slog("contacted tile %i %i", i, j);
-                return 1;
+                // slog("contacted tile %i %i", i, j);
+                return level->tilemap[index];
             }
         }
     }
