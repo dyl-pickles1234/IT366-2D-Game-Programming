@@ -8,7 +8,7 @@
 #include "player.h"
 #include "pad.h"
 
-#define PAD_NORMAL_BOOST 7.58
+#define PAD_NORMAL_BOOST 7.4
 
 Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
     Entity* self;

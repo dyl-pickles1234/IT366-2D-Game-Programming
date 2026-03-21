@@ -8,11 +8,13 @@
 #include "player.h"
 
 #define PLAYER_SPEED 1
-#define PLAYER_JUMP_SPEED 5.25
-#define PLAYER_GRAVITY 0.2
+#define PLAYER_JUMP_SPEED 5.05
+#define CUBE_GRAVITY 0.19
+#define SHIP_GRAVITY 0.13
 
 static Entity* player = NULL;
 static int gravityMult = 1;
+static PlayerMode playerMode = PLAYER_CUBE;
 
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
@@ -21,7 +23,7 @@ void player_entity_new(GFC_Vector2D pos) {
     if (!self) { slog("failed to create entity for player"); return; }
 
     self->sprite = gf2d_sprite_load_all(
-        "images/geometry_dash_player.png",
+        "images/player/cube.png",
         32,
         32,
         1,
@@ -42,28 +44,64 @@ void player_entity_new(GFC_Vector2D pos) {
 void player_think() {
     if (!player) return;
 
-    GFC_Vector2D move = { 0 };
+    switch (playerMode)
+    {
+    case PLAYER_CUBE:
+        player->sprite = gf2d_sprite_load_all(
+            "images/player/cube.png",
+            32,
+            32,
+            1,
+            false);
 
-    move.x += player->speed * gfc_input_key_down("d");
-    move.x -= player->speed * gfc_input_key_down("a");
+        GFC_Vector2D move = { 0 };
 
-    player->vel.x = level_get()->speed + move.x;
+        move.x += player->speed * gfc_input_key_down("d");
+        move.x -= player->speed * gfc_input_key_down("a");
 
-    GFC_Rect groundCheck = player->hitbox;
-    groundCheck.y += 1 * gravityMult;
-    int testGround = level_test_rect(level_get(), groundCheck);
-    if (testGround && testGround != 3) {
-        player->onGround = 1;
-    }
-    else {
+        player->vel.x = level_get()->speed + move.x;
+
+        GFC_Rect groundCheck = player->hitbox;
+        groundCheck.y += 1 * gravityMult;
+        int testGround = level_test_rect(level_get(), groundCheck);
+        if (testGround && testGround != 3) {
+            player->onGround = 1;
+        }
+        else {
+            player->onGround = 0;
+        }
+
+        if (gfc_input_key_down(" ") && player->onGround) {
+            player->vel.y = -PLAYER_JUMP_SPEED * gravityMult;
+            slog("jumped at tile %i %i", (int)(player->pos.x / 32), (int)(player->pos.y / 32));
+        }
+        break;
+    case PLAYER_SHIP:
+        player->sprite = gf2d_sprite_load_all(
+            "images/player/ship.png",
+            32,
+            32,
+            1,
+            false);
+
+        GFC_Vector2D moveShip = { 0 };
+
+        moveShip.x += player->speed * gfc_input_key_down("d");
+        moveShip.x -= player->speed * gfc_input_key_down("a");
+
+        player->vel.x = level_get()->speed + moveShip.x;
+
         player->onGround = 0;
-    }
 
-    if (gfc_input_key_down(" ") && player->onGround) {
-        player->vel.y = -PLAYER_JUMP_SPEED * gravityMult;
-        slog("jumped at tile %i %i", (int)(player->pos.x / 32), (int)(player->pos.y / 32));
+        if (gfc_input_key_down(" ")) {
+            // player->vel.y += -CUBE_GRAVITY * gravityMult;
+            gravityMult = -1;
+        }
+        else {
+            gravityMult = 1;
+        }
+        break;
     }
-
 }
 
 void player_update() {
@@ -106,13 +144,27 @@ void player_update() {
     player->hitbox.x = player->pos.x - 16;
     player->hitbox.y = player->pos.y - 16;
 
-    if (player->vel.x || player->vel.y) player->rotation = gfc_vector2d_angle(player->vel) * GFC_RADTODEG;
+    if (player->vel.x || player->vel.y) player->rotation = gfc_vector2d_angle(player->vel) * GFC_RADTODEG - 90;
 
     // apply gravity
-    if (!player->onGround) player->vel.y += PLAYER_GRAVITY * gravityMult;
+    float gravity;
+    switch (playerMode)
+    {
+    case PLAYER_CUBE:
+        gravity = CUBE_GRAVITY;
+        break;
+    case PLAYER_SHIP:
+        gravity = SHIP_GRAVITY;
+        break;
+    }
+    if (!player->onGround) player->vel.y += gravity * gravityMult;
 
     GFC_Vector2D cameraFocus = player->pos;
-    cameraFocus.y += 100 * gravityMult;
+    cameraFocus.x += 125;
+    // cameraFocus.y += 100 * gravityMult;
+    if (playerMode == PLAYER_SHIP) {
+        cameraFocus.y = 700;
+    }
     camera_center_on(cameraFocus);
 }
 
@@ -135,4 +187,8 @@ void player_reset() {
     player->pos.y = 464;
     gravityMult = 1;
     slog("player reset");
+}
+
+void player_mode_set(PlayerMode mode) {
+    playerMode = mode;
 }

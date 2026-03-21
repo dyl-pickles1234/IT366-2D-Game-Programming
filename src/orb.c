@@ -8,7 +8,7 @@
 #include "player.h"
 #include "orb.h"
 
-#define ORB_NORMAL_BOOST 5.45
+#define ORB_NORMAL_BOOST 5.35
 
 Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
     Entity* self;

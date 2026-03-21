@@ -66,6 +66,7 @@ int main(int argc, char* argv[])
     level_set(level);
 
     player_entity_new(gfc_vector2d(100, 464));
+    player_mode_set(PLAYER_SHIP);
 
     monster_new(gfc_vector2d(200, 250));
 
