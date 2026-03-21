@@ -5,6 +5,7 @@
 
 #include "gfc_text.h"
 #include "gf2d_sprite.h"
+#include "gfc_shape.h"
 
 typedef struct Entity_s {
     Uint8 _inuse;
@@ -13,11 +14,13 @@ typedef struct Entity_s {
     GFC_Vector2D vel;
     float speed;
     Uint8 onGround;
+    GFC_Rect hitbox;
     GFC_Vector2D scale;
     GFC_Vector2D center;
     float rotation;
     Sprite* sprite;
     float frame;
+    void* data;
 
     void (*think) (struct Entity_s* self);
     void (*update) (struct Entity_s* self);

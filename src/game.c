@@ -60,11 +60,12 @@ int main(int argc, char* argv[])
     //     48,
     //     24
     // );
-    Level* level = level_load("levels/testLevel.json");
+    // Level* level = level_load("levels/testLevel.json");
+    Level* level = level_load("levels/CantLetGo.json");
     if (!level) { slog("bad level"); return 1; }
     level_set(level);
 
-    player_entity_new(gfc_vector2d(100, 400));
+    player_entity_new(gfc_vector2d(100, 464));
 
     monster_new(gfc_vector2d(200, 250));
 

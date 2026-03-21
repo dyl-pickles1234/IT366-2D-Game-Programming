@@ -4,6 +4,9 @@
 #include "camera.h"
 #include "level.h"
 
+#include "pad.h"
+#include "orb.h"
+
 static Level* theLevel = NULL;
 
 Level* level_new() {
@@ -26,35 +29,6 @@ void level_free(Level* level) {
     free(level);
 }
 
-// Level* level_create(const char* bg, const char* tileset, Uint32 tileWidth, Uint32 tileHeight, Uint32 tilesPerLine, Uint32 width, Uint32 height) {
-//     Level* level = level_new();
-//     if (!level) return NULL;
-//     if (!width || !height) { slog("Can't make a level without tilemap dimensions"); return NULL; }
-
-//     if (bg) {
-//         level->bg = gf2d_sprite_load_image(bg);
-//     }
-
-//     if (tileset) {
-//         level->tileset = gf2d_sprite_load_all(
-//             tileset,
-//             tileWidth,
-//             tileHeight,
-//             tilesPerLine,
-//             true);
-//     }
-
-//     level->tilemap = gfc_allocate_array(sizeof(Uint8), width * height);
-//     level->width = width;
-//     level->height = height;
-//     level->tileWidth = tileWidth;
-//     level->tileHeight = tileHeight;
-
-//     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
-
-//     return level;
-// }
-
 Level* level_load(const char* filepath) {
     Level* level = level_new();
     if (!level) return NULL;
@@ -73,12 +47,15 @@ Level* level_load(const char* filepath) {
     SJson* speedJson = sj_object_get_value(levelConfig, "speed");
     SJson* tilemapJson = sj_object_get_value(levelConfig, "tilemap");
     SJson* tilemapFirstRowJson = sj_array_get_nth(tilemapJson, 0);
+    SJson* objectsJson = sj_object_get_value(levelConfig, "objects");
 
     // pull out the actual values from JSON
     const char* bgFilename = sj_get_string_value(bgJson);
     const char* tilesheetFilename = sj_get_string_value(tilesheetJson);
     int width, height, tileWidth, tileHeight, tilesPerRow;
     float speed;
+    int numObjects = sj_array_get_count(objectsJson);
+    GFC_List* objects = gfc_list_new_size(numObjects);
 
     sj_get_integer_value(tileWidthJson, &tileWidth);
     sj_get_integer_value(tileHeightJson, &tileHeight);
@@ -87,6 +64,10 @@ Level* level_load(const char* filepath) {
 
     width = sj_array_get_count(tilemapFirstRowJson);
     height = sj_array_get_count(tilemapJson);
+
+    for (int i = 0; i < numObjects; i++) {
+        gfc_list_append(objects, sj_array_get_nth(objectsJson, i));
+    }
 
     // configure level with all the loaded info!
     level->bg = gf2d_sprite_load_image(bgFilename);
@@ -114,6 +95,47 @@ Level* level_load(const char* filepath) {
             sj_get_integer_value(tileJson, &tileValue);
             level->tilemap[index] = tileValue;
         }
+    }
+
+    // create necessary objects
+    SJson* object;
+
+    GFC_TextLine type;
+    float posX, posY;
+    float rot;
+
+    for (int i = 0; i < numObjects; i++) {
+        object = gfc_list_get_nth(objects, i);
+        strcpy(type, sj_get_string_value(sj_object_get_value(object, "type")));
+        sj_get_float_value(sj_array_get_nth(sj_object_get_value(object, "pos"), 0), &posX);
+        sj_get_float_value(sj_array_get_nth(sj_object_get_value(object, "pos"), 1), &posY);
+        sj_get_float_value(sj_object_get_value(object, "rot"), &rot);
+
+        // fix up position (tile -> pixel, top-down Y -> bottom-up Y)
+        posX = posX * 32 + 16;
+        posY = (level->height - posY) * 32 - 16;
+
+        // construct entity
+        if (gfc_strlcmp(type, "normal_pad") == 0) {
+            posY += 16;
+            slog("spawning normal pad at %f %f", posX, posY);
+            pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "gravity_pad") == 0) {
+            posY += 16;
+            slog("spawning gravity pad at %f %f", posX, posY);
+            pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "normal_orb") == 0) {
+            slog("spawning normal orb at %f %f", posX, posY);
+            orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "gravity_orb") == 0) {
+            slog("spawning gravity orb at %f %f", posX, posY);
+            orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
+        }
+
+
     }
 
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
