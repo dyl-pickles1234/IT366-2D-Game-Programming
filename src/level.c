@@ -10,11 +10,15 @@
 
 static Level* theLevel = NULL;
 
+static GFC_List* enemies;
+
 Level* level_new() {
     Level* level;
 
     level = gfc_allocate_array(sizeof(Level), 1);
     if (!level) return NULL;
+
+    enemies = gfc_list_new();
 
     return level;
 }
@@ -49,6 +53,7 @@ Level* level_load(const char* filepath) {
     SJson* tilemapJson = sj_object_get_value(levelConfig, "tilemap");
     SJson* tilemapFirstRowJson = sj_array_get_nth(tilemapJson, 0);
     SJson* objectsJson = sj_object_get_value(levelConfig, "objects");
+    SJson* enemiesJson = sj_object_get_value(levelConfig, "enemies");
 
     // pull out the actual values from JSON
     const char* bgFilename = sj_get_string_value(bgJson);
@@ -56,7 +61,9 @@ Level* level_load(const char* filepath) {
     int width, height, tileWidth, tileHeight, tilesPerRow;
     float speed;
     int numObjects = sj_array_get_count(objectsJson);
+    int numEnemies = sj_array_get_count(enemiesJson);
     GFC_List* objects = gfc_list_new_size(numObjects);
+    GFC_List* enemiesJsonList = gfc_list_new_size(numEnemies);
 
     sj_get_integer_value(tileWidthJson, &tileWidth);
     sj_get_integer_value(tileHeightJson, &tileHeight);
@@ -68,6 +75,10 @@ Level* level_load(const char* filepath) {
 
     for (int i = 0; i < numObjects; i++) {
         gfc_list_append(objects, sj_array_get_nth(objectsJson, i));
+    }
+
+    for (int i = 0; i < numEnemies; i++) {
+        gfc_list_append(enemiesJsonList, sj_array_get_nth(enemiesJson, i));
     }
 
     // configure level with all the loaded info!
@@ -173,11 +184,39 @@ Level* level_load(const char* filepath) {
         }
     }
 
+    // create necessary enemies
+    SJson* enemy;
+
+    GFC_TextLine enemyType;
+    float enemyPosX, enemyPosY;
+
+    for (int i = 0; i < numEnemies; i++) {
+        enemy = gfc_list_get_nth(enemiesJsonList, i);
+        strcpy(enemyType, sj_get_string_value(sj_object_get_value(enemy, "type")));
+        sj_get_float_value(sj_array_get_nth(sj_object_get_value(enemy, "pos"), 0), &enemyPosX);
+        sj_get_float_value(sj_array_get_nth(sj_object_get_value(enemy, "pos"), 1), &enemyPosY);
+
+        // fix up position (tile -> pixel, top-down Y -> bottom-up Y)
+        enemyPosX = enemyPosX * 32 + 16;
+        enemyPosY = (level->height - enemyPosY) * 32 - 16;
+
+        // construct entity
+        if (gfc_strlcmp(enemyType, "block") == 0) {
+            slog("spawning enemy block at %f %f", enemyPosX, enemyPosY);
+            Entity* ent = orb_entity_new(ORB_GRAVITY, gfc_vector2d(enemyPosX, enemyPosY));
+            gfc_list_append(enemies, ent);
+        }
+    }
+
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
 
     sj_free(levelConfigFile);
 
     return level;
+}
+
+GFC_List* level_enemies_get() {
+    return enemies;
 }
 
 int level_get_tile_index(Level* level, Uint32 x, Uint32 y) {

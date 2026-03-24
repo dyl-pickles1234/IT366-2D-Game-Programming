@@ -38,6 +38,8 @@ Level* level_load(const char* filepath);
 
 void level_set(Level* level);
 
+GFC_List* level_enemies_get();
+
 Level* level_get();
 
 /**

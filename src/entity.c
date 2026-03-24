@@ -1,5 +1,7 @@
 #include "simple_logger.h"
 
+#include "gf2d_draw.h"
+
 #include "camera.h"
 #include "entity.h"
 
@@ -82,6 +84,14 @@ void entity_draw(Entity* ent) {
         NULL,
         NULL,
         (Uint32)ent->frame);
+
+    // debug draw all hitboxes
+    GFC_Rect hitboxScreen;
+    hitboxScreen.w = ent->hitbox.w * camera_get_zoom().x;
+    hitboxScreen.h = ent->hitbox.h * camera_get_zoom().y;
+    hitboxScreen.x = pos.x - hitboxScreen.w / 2;
+    hitboxScreen.y = pos.y - hitboxScreen.h / 2;
+    gf2d_draw_rect(hitboxScreen, GFC_COLOR_DARKRED);
 
     if (ent->draw) {
         ent->draw(ent);

@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
     level_set(level);
 
     player_entity_new(gfc_vector2d(100, 464));
-    // player_mode_set(PLAYER_SHIP);
+    // player_mode_set(PLAYER_UFO);
 
     camera_center_on(player_get()->pos);
 
@@ -88,6 +88,11 @@ int main(int argc, char* argv[])
         }
 
         SDL_GetMouseState(&mx, &my);
+
+        if (player_flipped_get()) {
+            mx = SCREEN_X - mx;
+        }
+
         mf += 0.1;
         if (mf >= 16.0)mf = 0;
 
