@@ -23,5 +23,8 @@ void player_gravity_set(int newGravity);
 PlayerMode player_mode_get();
 void player_mode_set(PlayerMode mode);
 
+Uint8 player_flipped_get();
+void player_flipped_set(Uint8 flipped);
+
 void player_reset();
 #endif

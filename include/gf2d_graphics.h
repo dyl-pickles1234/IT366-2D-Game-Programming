@@ -49,6 +49,8 @@ GFC_Vector2D gf2d_graphics_get_resolution();
  */
 SDL_Renderer* gf2d_graphics_get_renderer();
 
+SDL_Texture* gf2d_graphics_get_screen_texture();
+
 /**
  * @brief set the blend mode for the next draw calls (until this is changed)
  * @param mode the mode to set it to,  Supports all SDL_BlendModes
@@ -70,6 +72,11 @@ SDL_BlendMode gf2d_graphics_get_subtract_blend_mode();
  * @brief render the current frame to screen
  */
 void gf2d_graphics_next_frame();
+
+/**
+ * @brief render the current frame to screen flipped
+ */
+void gf2d_graphics_next_frame_flipped();
 
 /**
  * @brief clears drawing buffer.  Should be called each frame before drawing

@@ -94,16 +94,17 @@ int main(int argc, char* argv[])
         entity_manager_think_all();
         entity_manager_update_all();
 
+        // RENDERING
+        SDL_SetRenderTarget(gf2d_graphics_get_renderer(), gf2d_graphics_get_screen_texture());
         gf2d_graphics_clear_screen();// clears drawing buffers
+
         // all drawing should happen betweem clear_screen and next_frame
-            //backgrounds drawn first
-        // gf2d_sprite_draw_image(sprite, gfc_vector2d(0, 0));
 
         level_draw(level);
 
         entity_manager_draw_all();
 
-        //UI elements last
+        // UI elements last
         gf2d_sprite_draw(
             mouse,
             gfc_vector2d(mx, my),
@@ -114,7 +115,15 @@ int main(int argc, char* argv[])
             &mouseGFC_Color,
             (int)mf);
 
-        gf2d_graphics_next_frame();// render current draw frame and skip to the next frame
+        // render current draw frame and skip to the next frame
+        SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);
+
+        if (player_flipped_get()) {
+            gf2d_graphics_next_frame_flipped();
+        }
+        else {
+            gf2d_graphics_next_frame();
+        }
 
         if (keys[SDL_SCANCODE_UP]) camera_set_zoom(camera_get_zoom().x + 0.01);
         if (keys[SDL_SCANCODE_DOWN]) camera_set_zoom(camera_get_zoom().x - 0.01);

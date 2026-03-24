@@ -36,6 +36,10 @@ Entity* portal_entity_new(PortalType type, GFC_Vector2D pos) {
     data->type = type;
     self->data = data;
 
+    if (type >= PORTAL_GRAVITY_UP) {
+        self->scale.x *= 0.5;
+    }
+
     return self;
 }
 
@@ -48,7 +52,21 @@ void portal_think(Entity* portal) {
     int playerTest = gfc_rect_overlap(portal->hitbox, player->hitbox);
 
     if (playerTest) {
-        player_mode_set(data->type);
+        if (data->type < PORTAL_GRAVITY_UP) {
+            player_mode_set(data->type);
+        }
+        else if (data->type == PORTAL_GRAVITY_UP) {
+            player_gravity_set(-1);
+        }
+        else if (data->type == PORTAL_GRAVITY_DOWN) {
+            player_gravity_set(1);
+        }
+        else if (data->type == PORTAL_FLIP_FLIPPED) {
+            player_flipped_set(1);
+        }
+        else if (data->type == PORTAL_FLIP_NORMAL) {
+            player_flipped_set(0);
+        }
     }
 }
 
@@ -59,6 +77,8 @@ void portal_update(Entity* portal) {
 void portal_draw(Entity* portal) {
     if (!portal) return;
     PortalData* data = portal->data;
+
+    if (data->type == PORTAL_GRAVITY_UP || data->type == PORTAL_GRAVITY_DOWN) return;
 
     GFC_Vector2D pos;
     GFC_Vector2D scale = camera_get_zoom();
@@ -112,6 +132,18 @@ void portal_draw(Entity* portal) {
             32,
             1,
             false);
+        break;
+    case PORTAL_FLIP_FLIPPED:
+    case PORTAL_FLIP_NORMAL:
+        sprite = gf2d_sprite_load_all(
+            "images/objects/portal.png",
+            32,
+            32,
+            1,
+            false);
+        scale.x *= 2;
+        scale.y *= 2;
+        pos.y -= 32;
         break;
     }
     gf2d_sprite_draw(

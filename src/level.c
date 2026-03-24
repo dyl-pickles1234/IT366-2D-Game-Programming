@@ -155,8 +155,22 @@ Level* level_load(const char* filepath) {
             slog("spawning ufo portal at %f %f", posX, posY);
             portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
         }
-
-
+        else if (gfc_strlcmp(type, "gravity_up_portal") == 0) {
+            slog("spawning gravity up portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_GRAVITY_UP, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "gravity_down_portal") == 0) {
+            slog("spawning gravity down portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_GRAVITY_DOWN, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "flip_flipped_portal") == 0) {
+            slog("spawning flip flipped portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_FLIP_FLIPPED, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "flip_normal_portal") == 0) {
+            slog("spawning flip normal portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_FLIP_NORMAL, gfc_vector2d(posX, posY));
+        }
     }
 
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));

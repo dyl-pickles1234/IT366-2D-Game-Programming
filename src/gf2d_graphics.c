@@ -100,7 +100,8 @@ void gf2d_graphics_initialize(
     gf2d_graphics.texture = SDL_CreateTexture(
         gf2d_graphics.renderer,
         SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_STREAMING,
+        SDL_TEXTUREACCESS_TARGET,
+        // SDL_TEXTUREACCESS_STREAMING,
         renderWidth, renderHeight);
     if (!gf2d_graphics.texture)
     {
@@ -313,9 +314,17 @@ void gf2d_graphics_frame_delay()
 
 void gf2d_graphics_next_frame()
 {
+    SDL_RenderCopyEx(gf2d_graphics.renderer, gf2d_graphics.texture, NULL, NULL, 0, NULL, SDL_FLIP_NONE);
     SDL_RenderPresent(gf2d_graphics.renderer);
     gf2d_graphics_frame_delay();
 }
+
+void gf2d_graphics_next_frame_flipped() {
+    SDL_RenderCopyEx(gf2d_graphics.renderer, gf2d_graphics.texture, NULL, NULL, 0, NULL, SDL_FLIP_HORIZONTAL);
+    SDL_RenderPresent(gf2d_graphics.renderer);
+    gf2d_graphics_frame_delay();
+}
+
 
 void gf2d_graphics_clear_screen()
 {

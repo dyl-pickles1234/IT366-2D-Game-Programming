@@ -9,6 +9,10 @@ typedef enum {
     PORTAL_BALL,
     PORTAL_WAVE,
     PORTAL_UFO,
+    PORTAL_GRAVITY_UP,
+    PORTAL_GRAVITY_DOWN,
+    PORTAL_FLIP_FLIPPED,
+    PORTAL_FLIP_NORMAL
 } PortalType;
 
 typedef struct {

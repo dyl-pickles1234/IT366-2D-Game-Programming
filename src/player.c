@@ -7,7 +7,7 @@
 
 #include "player.h"
 
-#define PLAYER_SPEED 3.5
+#define PLAYER_SPEED 1
 
 #define CUBE_JUMP_SPEED 5.05
 #define SHIP_BOOST_SPEED 0.3
@@ -20,6 +20,7 @@
 static Entity* player = NULL;
 static int gravityMult = 1;
 static PlayerMode playerMode = PLAYER_CUBE;
+static Uint8 flipped = 0;
 
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
@@ -53,6 +54,8 @@ void player_think() {
 
     move.x += player->speed * gfc_input_key_down("d");
     move.x -= player->speed * gfc_input_key_down("a");
+
+    if (flipped) move.x *= -1;
 
     player->vel.x = level_get()->speed + move.x;
 
@@ -250,4 +253,12 @@ void player_mode_set(PlayerMode mode) {
 
 PlayerMode player_mode_get() {
     return playerMode;
+}
+
+Uint8 player_flipped_get() {
+    return flipped;
+}
+
+void player_flipped_set(Uint8 flip) {
+    flipped = flip;
 }
