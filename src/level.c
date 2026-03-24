@@ -7,6 +7,7 @@
 #include "pad.h"
 #include "orb.h"
 #include "portal.h"
+#include "enemy.h"
 
 static Level* theLevel = NULL;
 
@@ -200,12 +201,19 @@ Level* level_load(const char* filepath) {
         enemyPosX = enemyPosX * 32 + 16;
         enemyPosY = (level->height - enemyPosY) * 32 - 16;
 
+        Entity* ent = NULL;
+
         // construct entity
-        if (gfc_strlcmp(enemyType, "block") == 0) {
-            slog("spawning enemy block at %f %f", enemyPosX, enemyPosY);
-            Entity* ent = orb_entity_new(ORB_GRAVITY, gfc_vector2d(enemyPosX, enemyPosY));
-            gfc_list_append(enemies, ent);
+        if (gfc_strlcmp(enemyType, "saw") == 0) {
+            slog("spawning enemy saw at %f %f", enemyPosX, enemyPosY);
+            ent = enemy_entity_new(ENEMY_SAW, gfc_vector2d(enemyPosX, enemyPosY));
         }
+        else if (gfc_strlcmp(enemyType, "block") == 0) {
+            slog("spawning enemy block at %f %f", enemyPosX, enemyPosY);
+            ent = enemy_entity_new(ENEMY_BLOCK, gfc_vector2d(enemyPosX, enemyPosY));
+        }
+
+        if (ent) gfc_list_append(enemies, ent);
     }
 
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
