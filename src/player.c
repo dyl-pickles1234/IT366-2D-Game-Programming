@@ -20,13 +20,22 @@
 #define UFO_GRAVITY 0.1
 
 #define MAX_CHARGE 60
+#define PRACTICE_TIMER 150
 
 static Entity* player = NULL;
-static int gravityMult = 1;
 static PlayerMode playerMode = PLAYER_CUBE;
+
+static int gravityMult = 1;
 static Uint8 flipped = 0;
 static int charge = 0;
 static int shootTimer = 0;
+
+static int practiceMode = 0;
+static int practiceTimer = PRACTICE_TIMER;
+static GFC_Vector2D practiceCheckpointPos = { 0 };
+static int practiceCheckpointGravity = 1;
+static Uint8 practiceCheckpointFlipped = 0;
+static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
 
 static int mouseX, mouseY;
 static int prevLClick, prevRClick;
@@ -50,6 +59,7 @@ void player_entity_new(GFC_Vector2D pos) {
     self->scale = gfc_vector2d(1, 1);
     self->think = player_think;
     self->update = player_update;
+    self->draw = player_draw;
 
     self->speed = PLAYER_SPEED;
     self->hitbox = gfc_rect(pos.x - 16, pos.y - 16, 31, 31);
@@ -77,6 +87,18 @@ void player_think() {
     }
     else {
         player->onGround = 0;
+    }
+
+    if (gfc_input_key_pressed("p")) {
+        practiceMode = practiceMode ? 0 : 1;
+    }
+
+    if (practiceMode && player->onGround && practiceTimer <= 0) {
+        practiceCheckpointPos = player->pos;
+        practiceCheckpointGravity = gravityMult;
+        practiceCheckpointFlipped = flipped;
+        practiceCheckpointMode = playerMode;
+        practiceTimer = PRACTICE_TIMER;
     }
 
     prevLClick = lClick;
@@ -340,6 +362,7 @@ void player_think() {
     }
 
     if (charge < MAX_CHARGE) charge++;
+    if (practiceTimer > 0) practiceTimer--;
 }
 
 void player_update() {
@@ -441,10 +464,18 @@ void player_gravity_set(int newGravity) {
 void player_reset() {
     player->vel.x = 0;
     player->vel.y = 0;
-    player->pos.x = 100;
-    player->pos.y = 464;
-    gravityMult = 1;
-    playerMode = PLAYER_CUBE;
+    if (practiceMode) {
+        player->pos = practiceCheckpointPos;
+        gravityMult = practiceCheckpointGravity;
+        flipped = practiceCheckpointFlipped;
+        playerMode = practiceCheckpointMode;
+    }
+    else {
+        player->pos.x = 100;
+        player->pos.y = 464;
+        gravityMult = 1;
+        playerMode = PLAYER_CUBE;
+    }
     slog("player reset");
     SDL_Delay(250);
 }
@@ -463,4 +494,41 @@ Uint8 player_flipped_get() {
 
 void player_flipped_set(Uint8 flip) {
     flipped = flip;
+}
+
+float player_charge_get() {
+    return (float)charge / MAX_CHARGE;
+}
+
+void player_draw(Entity* player) {
+    if (!player || !practiceMode) return;
+    GFC_Vector2D pos;
+    GFC_Vector2D scale = camera_get_zoom();
+
+    gfc_vector2d_add(pos, practiceCheckpointPos, camera_get_offset());
+    pos = gfc_vector2d_multiply(pos, scale);
+
+    scale.x *= 0.5;
+    scale.y *= 0.5;
+
+    Sprite* sprite;
+
+    sprite = gf2d_sprite_load_all(
+        "images/player/wave2.png",
+        32,
+        32,
+        1,
+        false);
+
+    GFC_Vector2D center = { 16, 16 };
+
+    gf2d_sprite_draw(
+        sprite,
+        pos,
+        &scale,
+        &center,
+        NULL,
+        NULL,
+        NULL,
+        0);
 }

@@ -14,6 +14,7 @@ typedef enum {
 void player_entity_new(GFC_Vector2D pos);
 void player_think();
 void player_update();
+void player_draw();
 
 Entity* player_get();
 
@@ -25,6 +26,8 @@ void player_mode_set(PlayerMode mode);
 
 Uint8 player_flipped_get();
 void player_flipped_set(Uint8 flipped);
+
+float player_charge_get();
 
 void player_reset();
 #endif

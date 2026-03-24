@@ -20,12 +20,14 @@ int main(int argc, char* argv[])
 {
     /*variable declarations*/
     int done = 0;
+    int paused = 0;
     const Uint8* keys;
 
     int mx, my;
     float mf = 0;
     Sprite* mouse;
     GFC_Color mouseGFC_Color = gfc_color8(255, 100, 255, 200);
+    GFC_Color chargeGFC_Color = gfc_color8(0, 255, 255, 200);
 
     /*program initializtion*/
     init_logger("gf2d.log", 0);
@@ -87,7 +89,7 @@ int main(int argc, char* argv[])
             monster_new(gfc_vector2d(gfc_random() * SCREEN_X, gfc_random() * SCREEN_Y));
         }
 
-        SDL_GetMouseState(&mx, &my);
+        Uint32 clicks = SDL_GetMouseState(&mx, &my);
 
         if (player_flipped_get()) {
             mx = SCREEN_X - mx;
@@ -96,8 +98,21 @@ int main(int argc, char* argv[])
         mf += 0.1;
         if (mf >= 16.0)mf = 0;
 
-        entity_manager_think_all();
-        entity_manager_update_all();
+        // pause button :P
+        if (mx <= 100 && my <= 100 && clicks & SDL_BUTTON(1) != 0 && !paused) {
+            slog("paused");
+            paused = 1;
+        }
+
+        if (mx >= 1100 && my <= 100 && clicks & SDL_BUTTON(1) != 0 && paused) {
+            slog("unpaused");
+            paused = 0;
+        }
+
+        if (!paused) {
+            entity_manager_think_all();
+            entity_manager_update_all();
+        }
 
         // RENDERING
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), gf2d_graphics_get_screen_texture());
@@ -110,6 +125,62 @@ int main(int argc, char* argv[])
         entity_manager_draw_all();
 
         // UI elements last
+        float charge = player_charge_get();
+        GFC_Vector2D chargeScale = gfc_vector2d(5 * charge, 1);
+        Sprite* chargeSprite = gf2d_sprite_load_all(
+            "images/ui/charge.png",
+            32,
+            32,
+            1,
+            false);
+
+        gf2d_sprite_draw(
+            chargeSprite,
+            gfc_vector2d(50, 100),
+            &chargeScale,
+            NULL,
+            NULL,
+            NULL,
+            &chargeGFC_Color,
+            0);
+
+        if (!paused) {
+            Sprite* pauseSprite = gf2d_sprite_load_all(
+                "images/ui/pause.png",
+                100,
+                100,
+                1,
+                false);
+
+            gf2d_sprite_draw(
+                pauseSprite,
+                gfc_vector2d(0, 0),
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                0);
+        }
+        else {
+            Sprite* playSprite = gf2d_sprite_load_all(
+                "images/ui/play.png",
+                100,
+                100,
+                1,
+                false);
+
+            gf2d_sprite_draw(
+                playSprite,
+                gfc_vector2d(1100, 0),
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                NULL,
+                0);
+        }
+
         gf2d_sprite_draw(
             mouse,
             gfc_vector2d(mx, my),
