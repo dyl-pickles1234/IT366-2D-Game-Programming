@@ -61,6 +61,16 @@
                 "type": "gravity_orb",
                 "pos": [ 22, 7 ],
                 "rot": 0
+            },
+            {
+                "type": "ball_portal",
+                "pos": [ 10, 3 ],
+                "rot": 0
+            },
+            {
+                "type": "cube_portal",
+                "pos": [ 3, 3 ],
+                "rot": 0
             }
         ]
     }

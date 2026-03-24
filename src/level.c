@@ -6,6 +6,7 @@
 
 #include "pad.h"
 #include "orb.h"
+#include "portal.h"
 
 static Level* theLevel = NULL;
 
@@ -133,6 +134,26 @@ Level* level_load(const char* filepath) {
         else if (gfc_strlcmp(type, "gravity_orb") == 0) {
             slog("spawning gravity orb at %f %f", posX, posY);
             orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "cube_portal") == 0) {
+            slog("spawning cube portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_CUBE, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "ship_portal") == 0) {
+            slog("spawning ship portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_SHIP, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "ball_portal") == 0) {
+            slog("spawning ball portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_BALL, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "wave_portal") == 0) {
+            slog("spawning wave portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_WAVE, gfc_vector2d(posX, posY));
+        }
+        else if (gfc_strlcmp(type, "ufo_portal") == 0) {
+            slog("spawning ufo portal at %f %f", posX, posY);
+            portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
         }
 
 

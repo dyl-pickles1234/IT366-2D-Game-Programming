@@ -41,6 +41,10 @@ void camera_center_on(GFC_Vector2D pos) {
     camera_snap_to_bounds();
 }
 
+GFC_Vector2D camera_get_center() {
+    return gfc_vector2d(camera.view.x + (camera.view.w * 0.5 / camera.zoom), camera.view.y + (camera.view.h * 0.5 / camera.zoom));
+}
+
 void camera_snap_to_bounds()
 {
     if (camera.view.x + camera.view.w / camera.zoom > camera.bounds.w) camera.view.x = camera.bounds.w - camera.view.w / camera.zoom;

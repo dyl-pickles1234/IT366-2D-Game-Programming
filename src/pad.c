@@ -43,11 +43,12 @@ void pad_think(Entity* pad) {
     int playerTest = gfc_rect_overlap(pad->hitbox, player->hitbox);
 
     if (playerTest) {
+        int grav = player_gravity_get();
         if (pad->speed != -1) { // if speed is valid, boost player by that much
-            player->vel.y = -pad->speed;
+            player->vel.y = -pad->speed * grav;
         }
         else { // treat as gravity pad
-            player_gravity_set(-1 * player_gravity_get());
+            player_gravity_set(-1 * grav);
             player->vel.y = -4;
         }
     }

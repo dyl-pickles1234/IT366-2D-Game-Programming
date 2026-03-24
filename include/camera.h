@@ -12,6 +12,8 @@ typedef struct {
 GFC_Vector2D camera_get_position();
 GFC_Vector2D camera_get_offset();
 GFC_Vector2D camera_get_zoom();
+GFC_Vector2D camera_get_center();
+
 void camera_set_position(GFC_Vector2D position);
 void camera_set_dimension(GFC_Vector2D dimension);
 void camera_set_bounds(GFC_Rect bounds);

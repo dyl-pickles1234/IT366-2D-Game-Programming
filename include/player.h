@@ -19,6 +19,8 @@ Entity* player_get();
 
 int player_gravity_get();
 void player_gravity_set(int newGravity);
+
+PlayerMode player_mode_get();
 void player_mode_set(PlayerMode mode);
 
 void player_reset();

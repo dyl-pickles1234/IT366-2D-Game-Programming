@@ -17,7 +17,7 @@ Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
     if (!self) { slog("failed to create entity for orb"); return NULL; }
 
     self->sprite = gf2d_sprite_load_all(
-        "images/geometry_dash_player.png",
+        "images/player/cube.png",
         32,
         32,
         1,
@@ -43,11 +43,11 @@ void orb_think(Entity* orb) {
     int playerTest = gfc_rect_overlap(orb->hitbox, player->hitbox);
 
     if (playerTest && gfc_input_key_pressed(" ")) {
+        int grav = player_gravity_get();
         if (orb->speed != -1) { // if speed is valid, boost player by that much
-            player->vel.y = -orb->speed;
+            player->vel.y = -orb->speed * grav;
         }
         else { // treat as gravity orb
-            int grav = player_gravity_get();
             player_gravity_set(-1 * grav);
             player->vel.y = -4 * grav;
         }

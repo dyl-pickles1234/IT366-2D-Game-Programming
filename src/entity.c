@@ -82,6 +82,10 @@ void entity_draw(Entity* ent) {
         NULL,
         NULL,
         (Uint32)ent->frame);
+
+    if (ent->draw) {
+        ent->draw(ent);
+    }
 }
 
 void entity_manager_draw_all() {

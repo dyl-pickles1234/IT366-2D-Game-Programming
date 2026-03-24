@@ -7,10 +7,15 @@
 
 #include "player.h"
 
-#define PLAYER_SPEED 1
-#define PLAYER_JUMP_SPEED 5.05
+#define PLAYER_SPEED 3.5
+
+#define CUBE_JUMP_SPEED 5.05
+#define SHIP_BOOST_SPEED 0.3
+#define UFO_JUMP_SPEED 3.15
+
 #define CUBE_GRAVITY 0.19
 #define SHIP_GRAVITY 0.13
+#define UFO_GRAVITY 0.1
 
 static Entity* player = NULL;
 static int gravityMult = 1;
@@ -44,6 +49,23 @@ void player_entity_new(GFC_Vector2D pos) {
 void player_think() {
     if (!player) return;
 
+    GFC_Vector2D move = { 0 };
+
+    move.x += player->speed * gfc_input_key_down("d");
+    move.x -= player->speed * gfc_input_key_down("a");
+
+    player->vel.x = level_get()->speed + move.x;
+
+    GFC_Rect groundCheck = player->hitbox;
+    groundCheck.y += 1 * gravityMult;
+    int testGround = level_test_rect(level_get(), groundCheck);
+    if (testGround && testGround != 3) {
+        player->onGround = 1;
+    }
+    else {
+        player->onGround = 0;
+    }
+
     switch (playerMode)
     {
     case PLAYER_CUBE:
@@ -54,26 +76,9 @@ void player_think() {
             1,
             false);
 
-        GFC_Vector2D move = { 0 };
-
-        move.x += player->speed * gfc_input_key_down("d");
-        move.x -= player->speed * gfc_input_key_down("a");
-
-        player->vel.x = level_get()->speed + move.x;
-
-        GFC_Rect groundCheck = player->hitbox;
-        groundCheck.y += 1 * gravityMult;
-        int testGround = level_test_rect(level_get(), groundCheck);
-        if (testGround && testGround != 3) {
-            player->onGround = 1;
-        }
-        else {
-            player->onGround = 0;
-        }
-
         if (gfc_input_key_down(" ") && player->onGround) {
-            player->vel.y = -PLAYER_JUMP_SPEED * gravityMult;
-            slog("jumped at tile %i %i", (int)(player->pos.x / 32), (int)(player->pos.y / 32));
+            player->vel.y = -CUBE_JUMP_SPEED * gravityMult;
+            // slog("jumped at tile %i %i", (int)(player->pos.x / 32), (int)(player->pos.y / 32));
         }
         break;
     case PLAYER_SHIP:
@@ -84,21 +89,50 @@ void player_think() {
             1,
             false);
 
-        GFC_Vector2D moveShip = { 0 };
+        if (gfc_input_key_down(" ")) {
+            player->vel.y += -SHIP_BOOST_SPEED;
+        }
+        break;
+    case PLAYER_BALL:
+        player->sprite = gf2d_sprite_load_all(
+            "images/player/ball.png",
+            32,
+            32,
+            1,
+            false);
 
-        moveShip.x += player->speed * gfc_input_key_down("d");
-        moveShip.x -= player->speed * gfc_input_key_down("a");
-
-        player->vel.x = level_get()->speed + moveShip.x;
-
-        player->onGround = 0;
+        if (gfc_input_key_pressed(" ") && player->onGround) {
+            // player->vel.y = -CUBE_JUMP_SPEED * gravityMult;
+            player->vel.y = 0;
+            gravityMult *= -1;
+        }
+        break;
+    case PLAYER_WAVE:
+        player->sprite = gf2d_sprite_load_all(
+            "images/player/wave.png",
+            32,
+            32,
+            1,
+            false);
 
         if (gfc_input_key_down(" ")) {
-            // player->vel.y += -CUBE_GRAVITY * gravityMult;
-            gravityMult = -1;
+            // player->vel.y = -CUBE_JUMP_SPEED * gravityMult;
+            player->vel.y = -level_get()->speed;
         }
         else {
-            gravityMult = 1;
+            player->vel.y = level_get()->speed;
+        }
+        break;
+    case PLAYER_UFO:
+        player->sprite = gf2d_sprite_load_all(
+            "images/player/ufo.png",
+            32,
+            32,
+            1,
+            false);
+
+        if (gfc_input_key_pressed(" ")) {
+            player->vel.y = -UFO_JUMP_SPEED * gravityMult;
         }
         break;
     }
@@ -116,7 +150,7 @@ void player_update() {
     int testV = level_test_rect(level_get(), levelVCheck);
 
     if (testV) {
-        if (testV == 3 || player->vel.y * gravityMult < 0) { // hit spike or jumped into ceiling
+        if (testV == 3 || (playerMode == PLAYER_CUBE && player->vel.y * gravityMult < 0) || playerMode == PLAYER_WAVE) { // hit spike, cube jumped into ceiling, or wave
             player_reset();
         }
         player->vel.y = 0;
@@ -150,21 +184,41 @@ void player_update() {
     float gravity;
     switch (playerMode)
     {
-    case PLAYER_CUBE:
-        gravity = CUBE_GRAVITY;
-        break;
     case PLAYER_SHIP:
         gravity = SHIP_GRAVITY;
         break;
+    case PLAYER_UFO:
+        gravity = UFO_GRAVITY;
+        break;
+    default:
+        gravity = CUBE_GRAVITY;
     }
+
     if (!player->onGround) player->vel.y += gravity * gravityMult;
+
+    // cap speed if necessary
+    if (playerMode == PLAYER_SHIP) {
+        // cap going down
+        if (player->vel.y * gravityMult >= level_get()->speed) {
+            player->vel.y = gravityMult * level_get()->speed;
+        }
+        // cap going up
+        else if (player->vel.y * gravityMult <= -level_get()->speed * 1.5) {
+            player->vel.y = gravityMult * -level_get()->speed * 1.5;
+        }
+    }
+    else if (playerMode == PLAYER_UFO && player->vel.y * gravityMult >= level_get()->speed) {
+        player->vel.y = gravityMult * level_get()->speed;
+    }
+
 
     GFC_Vector2D cameraFocus = player->pos;
     cameraFocus.x += 125;
     // cameraFocus.y += 100 * gravityMult;
-    if (playerMode == PLAYER_SHIP) {
-        cameraFocus.y = 700;
+    if (playerMode != PLAYER_CUBE) {
+        // cameraFocus.y = camera_get_center().y;
     }
+
     camera_center_on(cameraFocus);
 }
 
@@ -186,9 +240,14 @@ void player_reset() {
     player->pos.x = 100;
     player->pos.y = 464;
     gravityMult = 1;
+    playerMode = PLAYER_CUBE;
     slog("player reset");
 }
 
 void player_mode_set(PlayerMode mode) {
     playerMode = mode;
+}
+
+PlayerMode player_mode_get() {
+    return playerMode;
 }
