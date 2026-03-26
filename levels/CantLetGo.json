@@ -1,7 +1,7 @@
 {
     "level":
     {
-        "background": "images/backgrounds/bg_flat.png",
+        "background": "images/backgrounds/geometrydash.png",
         "tileset":
         {
             "tilesheet": "images/tiles/geometry_dash.png",

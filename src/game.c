@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
     //     24
     // );
 
-    Level* level = level_load("levels/testLevel.json");
-    // Level* level = level_load("levels/CantLetGo.json");
+    // Level* level = level_load("levels/showcase.json");
+    Level* level = level_load("levels/CantLetGo.json");
 
     if (!level) { slog("bad level"); return 1; }
     level_set(level);
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 
     camera_center_on(player_get()->pos);
 
-    monster_new(gfc_vector2d(200, 250));
+    // monster_new(gfc_vector2d(200, 250));
 
     slog("press [escape] to quit");
 

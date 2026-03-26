@@ -9,7 +9,7 @@
 
 #include "player.h"
 
-#define PLAYER_SPEED 3
+#define PLAYER_SPEED 2
 
 #define CUBE_JUMP_SPEED 5.05
 #define SHIP_BOOST_SPEED 0.3
@@ -443,7 +443,7 @@ void player_update() {
     // cameraFocus.x += 125;
     // cameraFocus.y += 100 * gravityMult;
     if (playerMode != PLAYER_CUBE) {
-        cameraFocus.y = camera_get_center().y;
+        // cameraFocus.y = camera_get_center().y;
     }
 
     camera_center_on(cameraFocus);
@@ -474,6 +474,7 @@ void player_reset() {
         player->pos.x = 100;
         player->pos.y = 464;
         gravityMult = 1;
+        flipped = 0;
         playerMode = PLAYER_CUBE;
     }
     slog("player reset");
