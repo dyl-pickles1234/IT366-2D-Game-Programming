@@ -71,6 +71,7 @@ int main(int argc, char* argv[])
 
     player_entity_new(gfc_vector2d(100, 464));
     // player_mode_set(PLAYER_UFO);
+    player_editor_mode_set(1);
 
     camera_center_on(player_get()->pos);
 

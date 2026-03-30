@@ -25,6 +25,12 @@
 static Entity* player = NULL;
 static PlayerMode playerMode = PLAYER_CUBE;
 
+static Uint8 editorMode = 0;
+static ObjectType objectType = OBJECT_TILE;
+static int selectedTile = 1;
+static GFC_TextLine selectedObject = "normal_orb";
+static GFC_TextLine selectedEnemy = "block";
+
 static int gravityMult = 1;
 static Uint8 flipped = 0;
 static int charge = 0;
@@ -65,6 +71,89 @@ void player_entity_new(GFC_Vector2D pos) {
     self->hitbox = gfc_rect(pos.x - 16, pos.y - 16, 31, 31);
 
     player = self;
+}
+
+void player_editor_think() {
+    if (!player) return;
+
+    Level* level = level_get();
+
+    GFC_Vector2D move = { 0 };
+
+    move.x += player->speed * gfc_input_key_down("d");
+    move.x -= player->speed * gfc_input_key_down("a");
+    move.y += player->speed * gfc_input_key_down("s");
+    move.y -= player->speed * gfc_input_key_down("w");
+
+    player->vel = move;
+
+    prevLClick = lClick;
+    prevRClick = rClick;
+
+    Uint32 clicks = SDL_GetMouseState(&mouseX, &mouseY);
+    lClick = (clicks & SDL_BUTTON(1)) != 0;
+    rClick = (clicks & SDL_BUTTON(3)) != 0;
+
+    GFC_Vector2D mouseInLevel = gfc_vector2d(mouseX, mouseY);
+    mouseInLevel.x /= camera_get_zoom().x;
+    mouseInLevel.y /= camera_get_zoom().y;
+    gfc_vector2d_add(mouseInLevel, mouseInLevel, camera_get_position());
+
+    if (lClick) {
+        switch (objectType)
+        {
+        case OBJECT_TILE:
+            level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = selectedTile;
+            break;
+        case OBJECT_OBJECT:
+            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            if (!prevLClick) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
+            break;
+        case OBJECT_ENEMY:
+            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            break;
+        }
+    }
+
+    if (rClick) {
+        switch (objectType)
+        {
+        case OBJECT_TILE:
+            level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 0;
+            break;
+        case OBJECT_OBJECT:
+            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            // if (!prevLClick) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
+            break;
+        case OBJECT_ENEMY:
+            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            break;
+        }
+    }
+
+
+    if (gfc_input_key_down("LSHIFT")) {
+        player->speed = PLAYER_SPEED * 5;
+    }
+    else {
+        player->speed = PLAYER_SPEED;
+    }
+
+    if (gfc_input_key_pressed("TAB")) {
+        objectType++;
+        if (objectType == OBJECT_END) objectType = OBJECT_TILE;
+    }
+}
+
+void player_editor_update() {
+    if (!player) return;
+
+    gfc_vector2d_add(player->pos, player->pos, player->vel);
+
+    GFC_Vector2D cameraFocus = player->pos;
+    // cameraFocus.x += 125;
+    // cameraFocus.y += 100 * gravityMult;
+    camera_center_on(cameraFocus);
 }
 
 void player_think() {
@@ -501,6 +590,84 @@ float player_charge_get() {
     return (float)charge / MAX_CHARGE;
 }
 
+void player_editor_draw(Entity* player) {
+    if (!player) return;
+
+    GFC_Color alpha = gfc_color(1, 1, 1, 0.5);
+
+    GFC_Vector2D pos = gfc_vector2d(mouseX, mouseY);
+    GFC_Vector2D scale = camera_get_zoom();
+
+    // project to tiles
+    pos.x /= scale.x;
+    pos.y /= scale.y;
+
+    gfc_vector2d_add(pos, pos, camera_get_position());
+
+    if (objectType == OBJECT_TILE) {
+        pos.x = (int)(pos.x / 32);
+        pos.y = (int)(pos.y / 32);
+    }
+    else {
+        pos.x = (pos.x / 32) - 0.5;
+        pos.y = (pos.y / 32) - 0.5;
+    }
+
+    // project back to screen
+    pos.x *= 32;
+    pos.y *= 32;
+
+    gfc_vector2d_sub(pos, pos, camera_get_position());
+
+    pos.x *= scale.x;
+    pos.y *= scale.y;
+
+    Sprite* sprite;
+
+    switch (objectType)
+    {
+    case OBJECT_TILE:
+        sprite = gf2d_sprite_load_all(
+            "images/tiles/geometry_dash.png",
+            32,
+            32,
+            1,
+            false);
+        break;
+    case OBJECT_OBJECT:
+        GFC_TextLine filename = "images/player/ship.png";
+
+        if (gfc_strlcmp(selectedObject, "normal_pad") == 0) {
+            strcpy(filename, "images/player/ball.png");
+        }
+        sprite = gf2d_sprite_load_all(
+            filename,
+            32,
+            32,
+            1,
+            false);
+        break;
+    case OBJECT_ENEMY:
+        sprite = gf2d_sprite_load_all(
+            "images/tiles/geometry_dash.png",
+            32,
+            32,
+            1,
+            false);
+        break;
+    }
+
+    gf2d_sprite_draw(
+        sprite,
+        pos,
+        &scale,
+        NULL,
+        NULL,
+        NULL,
+        &alpha,
+        objectType == OBJECT_TILE ? selectedTile : 0);
+}
+
 void player_draw(Entity* player) {
     if (!player || !practiceMode) return;
     GFC_Vector2D pos;
@@ -532,4 +699,22 @@ void player_draw(Entity* player) {
         NULL,
         NULL,
         0);
+}
+
+float player_editor_mode_get() {
+    return editorMode;
+}
+
+void player_editor_mode_set(Uint8 editor) {
+    editorMode = editor;
+    if (editor) {
+        player->think = player_editor_think;
+        player->update = player_editor_update;
+        player->draw = player_editor_draw;
+    }
+    else {
+        player->think = player_think;
+        player->update = player_update;
+        player->draw = player_draw;
+    }
 }

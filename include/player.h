@@ -11,6 +11,14 @@ typedef enum {
     PLAYER_UFO
 } PlayerMode;
 
+// for editor mode
+typedef enum {
+    OBJECT_TILE = 0,
+    OBJECT_OBJECT,
+    OBJECT_ENEMY,
+    OBJECT_END
+} ObjectType;
+
 void player_entity_new(GFC_Vector2D pos);
 void player_think();
 void player_update();
@@ -28,6 +36,9 @@ Uint8 player_flipped_get();
 void player_flipped_set(Uint8 flipped);
 
 float player_charge_get();
+
+float player_editor_mode_get();
+void player_editor_mode_set(Uint8 editorMode);
 
 void player_reset();
 #endif

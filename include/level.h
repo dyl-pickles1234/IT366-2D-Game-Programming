@@ -2,6 +2,7 @@
 #define __LEVEL_H__
 
 #include "gf2d_sprite.h"
+#include "entity.h"
 
 typedef struct {
     Sprite* bg;
@@ -64,5 +65,9 @@ void level_free(Level* level);
  * @param level pointer to level we want to draw
  */
 void level_draw(Level* level);
+
+void level_construct_object(GFC_TextLine type, float posX, float posY, float rot);
+
+Entity* level_construct_enemy(GFC_TextLine type, float posX, float posY, float rot);
 
 #endif
