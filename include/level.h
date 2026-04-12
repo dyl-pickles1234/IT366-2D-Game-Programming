@@ -13,6 +13,23 @@ typedef struct {
     float speed;
 } Level;
 
+typedef enum {
+    OBJECT_OBJECT_ORB_NORMAL = 0,
+    OBJECT_OBJECT_ORB_GRAVITY,
+    OBJECT_OBJECT_PAD_NORMAL,
+    OBJECT_OBJECT_PAD_GRAVITY,
+    OBJECT_OBJECT_PORTAL_CUBE,
+    OBJECT_OBJECT_PORTAL_SHIP,
+    OBJECT_OBJECT_PORTAL_BALL,
+    OBJECT_OBJECT_PORTAL_WAVE,
+    OBJECT_OBJECT_PORTAL_UFO,
+    OBJECT_OBJECT_PORTAL_GRAVITY_UP,
+    OBJECT_OBJECT_PORTAL_GRAVITY_DOWN,
+    OBJECT_OBJECT_PORTAL_FLIP_FLIPPED,
+    OBJECT_OBJECT_PORTAL_FLIP_NORMAL,
+    OBJECT_OBJECT_END
+} LevelObjectType;
+
 /**
  * @brief make a new level
  */
@@ -66,7 +83,8 @@ void level_free(Level* level);
  */
 void level_draw(Level* level);
 
-void level_construct_object(GFC_TextLine type, float posX, float posY, float rot);
+void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot);
+void level_construct_object(LevelObjectType type, float posX, float posY, float rot);
 
 Entity* level_construct_enemy(GFC_TextLine type, float posX, float posY, float rot);
 

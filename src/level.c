@@ -129,7 +129,7 @@ Level* level_load(const char* filepath) {
         posY = (level->height - posY) * 32 - 16;
 
         // construct entity
-        level_construct_object(type, posX, posY, rot);
+        level_construct_object_from_name(type, posX, posY, rot);
     }
 
     // create necessary enemies
@@ -248,60 +248,109 @@ void level_draw(Level* level) {
     }
 }
 
-void level_construct_object(GFC_TextLine type, float posX, float posY, float rot) {
+void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot) {
+    LevelObjectType enum_type = OBJECT_OBJECT_END;
+
     if (gfc_strlcmp(type, "normal_pad") == 0) {
+        enum_type = OBJECT_OBJECT_PAD_NORMAL;
+    }
+    else if (gfc_strlcmp(type, "gravity_pad") == 0) {
+        enum_type = OBJECT_OBJECT_PAD_GRAVITY;
+    }
+    else if (gfc_strlcmp(type, "normal_orb") == 0) {
+        enum_type = OBJECT_OBJECT_ORB_NORMAL;
+    }
+    else if (gfc_strlcmp(type, "gravity_orb") == 0) {
+        enum_type = OBJECT_OBJECT_ORB_GRAVITY;
+    }
+    else if (gfc_strlcmp(type, "cube_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_CUBE;
+    }
+    else if (gfc_strlcmp(type, "ship_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_SHIP;
+    }
+    else if (gfc_strlcmp(type, "ball_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_BALL;
+    }
+    else if (gfc_strlcmp(type, "wave_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_WAVE;
+    }
+    else if (gfc_strlcmp(type, "ufo_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_UFO;
+    }
+    else if (gfc_strlcmp(type, "gravity_up_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_GRAVITY_UP;
+    }
+    else if (gfc_strlcmp(type, "gravity_down_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_GRAVITY_DOWN;
+    }
+    else if (gfc_strlcmp(type, "flip_flipped_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_FLIP_FLIPPED;
+    }
+    else if (gfc_strlcmp(type, "flip_normal_portal") == 0) {
+        enum_type = OBJECT_OBJECT_PORTAL_FLIP_NORMAL;
+    }
+
+    level_construct_object(enum_type, posX, posY, rot);
+}
+
+void level_construct_object(LevelObjectType type, float posX, float posY, float rot) {
+    switch (type)
+    {
+    case OBJECT_OBJECT_PAD_NORMAL:
         posY += 16;
         slog("spawning normal pad at %f %f", posX, posY);
         pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "gravity_pad") == 0) {
+        break;
+    case OBJECT_OBJECT_PAD_GRAVITY:
         posY += 16;
         slog("spawning gravity pad at %f %f", posX, posY);
         pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "normal_orb") == 0) {
+        break;
+    case OBJECT_OBJECT_ORB_NORMAL:
         slog("spawning normal orb at %f %f", posX, posY);
         orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "gravity_orb") == 0) {
+        break;
+    case OBJECT_OBJECT_ORB_GRAVITY:
         slog("spawning gravity orb at %f %f", posX, posY);
         orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "cube_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_CUBE:
         slog("spawning cube portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_CUBE, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "ship_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_SHIP:
         slog("spawning ship portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_SHIP, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "ball_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_BALL:
         slog("spawning ball portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_BALL, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "wave_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_WAVE:
         slog("spawning wave portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_WAVE, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "ufo_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_UFO:
         slog("spawning ufo portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "gravity_up_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_GRAVITY_UP:
         slog("spawning gravity up portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_GRAVITY_UP, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "gravity_down_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_GRAVITY_DOWN:
         slog("spawning gravity down portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_GRAVITY_DOWN, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "flip_flipped_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_FLIP_FLIPPED:
         slog("spawning flip flipped portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_FLIP_FLIPPED, gfc_vector2d(posX, posY));
-    }
-    else if (gfc_strlcmp(type, "flip_normal_portal") == 0) {
+        break;
+    case OBJECT_OBJECT_PORTAL_FLIP_NORMAL:
         slog("spawning flip normal portal at %f %f", posX, posY);
         portal_entity_new(PORTAL_FLIP_NORMAL, gfc_vector2d(posX, posY));
+        break;
     }
 }
 

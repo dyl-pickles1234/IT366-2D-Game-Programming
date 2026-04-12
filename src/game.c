@@ -63,8 +63,8 @@ int main(int argc, char* argv[])
     //     24
     // );
 
-    // Level* level = level_load("levels/showcase.json");
-    Level* level = level_load("levels/CantLetGo.json");
+    Level* level = level_load("levels/showcase.json");
+    // Level* level = level_load("levels/CantLetGo.json");
 
     if (!level) { slog("bad level"); return 1; }
     level_set(level);
@@ -204,6 +204,10 @@ int main(int argc, char* argv[])
 
         if (keys[SDL_SCANCODE_UP]) camera_set_zoom(camera_get_zoom().x + 0.01);
         if (keys[SDL_SCANCODE_DOWN]) camera_set_zoom(camera_get_zoom().x - 0.01);
+
+        if (gfc_input_key_pressed("t")) {
+            player_editor_mode_set(player_editor_mode_get() == 1 ? 0 : 1);
+        }
 
         if (keys[SDL_SCANCODE_LCTRL] && keys[SDL_SCANCODE_Q])done = 1; // exit condition (lctrl+q)
         // slog("Rendering at %f FPS", gf2d_graphics_get_frames_per_second());

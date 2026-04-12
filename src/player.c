@@ -6,6 +6,7 @@
 #include "level.h"
 
 #include "bullet.h"
+#include "enemy.h"
 
 #include "player.h"
 
@@ -28,8 +29,8 @@ static PlayerMode playerMode = PLAYER_CUBE;
 static Uint8 editorMode = 0;
 static ObjectType objectType = OBJECT_TILE;
 static int selectedTile = 1;
-static GFC_TextLine selectedObject = "normal_orb";
-static GFC_TextLine selectedEnemy = "block";
+static LevelObjectType selectedObject = 0;
+static EnemyType selectedEnemy = 0;
 
 static int gravityMult = 1;
 static Uint8 flipped = 0;
@@ -87,6 +88,32 @@ void player_editor_think() {
 
     player->vel = move;
 
+    // scroll through selected item to be placed
+    if (gfc_input_key_pressed("e")) {
+        if (objectType == OBJECT_TILE) {
+            selectedTile++;
+            if (selectedTile > 3) selectedTile = 1;
+        }
+        else if (objectType == OBJECT_OBJECT) {
+            selectedObject++;
+            if (selectedObject == OBJECT_OBJECT_END) selectedObject = 0;
+        }
+
+    }
+
+    if (gfc_input_key_pressed("q")) {
+        if (objectType == OBJECT_TILE) {
+            selectedTile--;
+            if (selectedTile < 1) selectedTile = 3;
+        }
+        else if (objectType == OBJECT_OBJECT) {
+            selectedObject--;
+            if (selectedObject == 0) selectedObject = OBJECT_OBJECT_END - 1;
+        }
+
+    }
+
+    // handle placing things
     prevLClick = lClick;
     prevRClick = rClick;
 
@@ -267,7 +294,7 @@ void player_think() {
             false);
 
         if (gfc_input_key_down(" ")) {
-            player->vel.y += -SHIP_BOOST_SPEED;
+            player->vel.y += -SHIP_BOOST_SPEED * gravityMult;
         }
 
         // left click shoot
@@ -347,10 +374,10 @@ void player_think() {
 
         if (gfc_input_key_down(" ")) {
             // player->vel.y = -CUBE_JUMP_SPEED * gravityMult;
-            player->vel.y = -level_get()->speed;
+            player->vel.y = -level_get()->speed * gravityMult;
         }
         else {
-            player->vel.y = level_get()->speed;
+            player->vel.y = level_get()->speed * gravityMult;
         }
 
         // left click shoot
@@ -561,7 +588,7 @@ void player_reset() {
     }
     else {
         player->pos.x = 100;
-        player->pos.y = 464;
+        player->pos.y = 564;
         gravityMult = 1;
         flipped = 0;
         playerMode = PLAYER_CUBE;
@@ -637,7 +664,7 @@ void player_editor_draw(Entity* player) {
     case OBJECT_OBJECT:
         GFC_TextLine filename = "images/player/ship.png";
 
-        if (gfc_strlcmp(selectedObject, "normal_pad") == 0) {
+        if (selectedObject == OBJECT_OBJECT_PAD_NORMAL) {
             strcpy(filename, "images/player/ball.png");
         }
         sprite = gf2d_sprite_load_all(
@@ -665,7 +692,7 @@ void player_editor_draw(Entity* player) {
         NULL,
         NULL,
         &alpha,
-        objectType == OBJECT_TILE ? selectedTile : 0);
+        objectType == OBJECT_TILE ? selectedTile - 1 : 0);
 }
 
 void player_draw(Entity* player) {
@@ -706,6 +733,7 @@ float player_editor_mode_get() {
 }
 
 void player_editor_mode_set(Uint8 editor) {
+    slog("switching editor mode - %i", editor);
     editorMode = editor;
     if (editor) {
         player->think = player_editor_think;
