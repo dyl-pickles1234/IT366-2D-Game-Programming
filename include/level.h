@@ -4,6 +4,8 @@
 #include "gf2d_sprite.h"
 #include "entity.h"
 
+#include "enemy.h"
+
 typedef struct {
     Sprite* bg;
     Sprite* tileset; // sprite containing tiles
@@ -86,6 +88,7 @@ void level_draw(Level* level);
 void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot);
 void level_construct_object(LevelObjectType type, float posX, float posY, float rot);
 
-Entity* level_construct_enemy(GFC_TextLine type, float posX, float posY, float rot);
+Entity* level_construct_enemy_from_name(GFC_TextLine type, float posX, float posY, float rot);
+Entity* level_construct_enemy(EnemyType type, float posX, float posY, float rot);
 
 #endif

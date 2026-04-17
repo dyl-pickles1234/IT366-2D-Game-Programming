@@ -98,7 +98,10 @@ void player_editor_think() {
             selectedObject++;
             if (selectedObject == OBJECT_OBJECT_END) selectedObject = 0;
         }
-
+        else if (objectType == OBJECT_ENEMY) {
+            selectedEnemy++;
+            if (selectedEnemy == ENEMY_END) selectedEnemy = 0;
+        }
     }
 
     if (gfc_input_key_pressed("q")) {
@@ -110,7 +113,10 @@ void player_editor_think() {
             selectedObject--;
             if (selectedObject == 0) selectedObject = OBJECT_OBJECT_END - 1;
         }
-
+        else if (objectType == OBJECT_ENEMY) {
+            selectedEnemy--;
+            if (selectedEnemy == 0) selectedEnemy = ENEMY_END - 1;
+        }
     }
 
     // handle placing things
@@ -138,6 +144,7 @@ void player_editor_think() {
             break;
         case OBJECT_ENEMY:
             // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            if (!prevLClick) level_construct_enemy(selectedEnemy, mouseInLevel.x, mouseInLevel.y, 0);
             break;
         }
     }

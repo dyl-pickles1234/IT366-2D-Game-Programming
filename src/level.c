@@ -148,12 +148,8 @@ Level* level_load(const char* filepath) {
         enemyPosX = enemyPosX * 32 + 16;
         enemyPosY = (level->height - enemyPosY) * 32 - 16;
 
-        Entity* ent = NULL;
-
         // construct entity
-        ent = level_construct_enemy(enemyType, enemyPosX, enemyPosY, 0);
-
-        if (ent) gfc_list_append(enemies, ent);
+        level_construct_enemy_from_name(enemyType, enemyPosX, enemyPosY, 0);
     }
 
     camera_set_bounds(gfc_rect(0, 0, level->tileWidth * level->width, level->tileHeight * level->height));
@@ -354,17 +350,36 @@ void level_construct_object(LevelObjectType type, float posX, float posY, float 
     }
 }
 
-Entity* level_construct_enemy(GFC_TextLine type, float posX, float posY, float rot) {
+Entity* level_construct_enemy_from_name(GFC_TextLine type, float posX, float posY, float rot) {
     Entity* ent = NULL;
+    EnemyType enum_type = ENEMY_END;
 
     if (gfc_strlcmp(type, "saw") == 0) {
-        slog("spawning enemy saw at %f %f", posX, posY);
-        ent = enemy_entity_new(ENEMY_SAW, gfc_vector2d(posX, posY));
+        enum_type = ENEMY_SAW;
     }
     else if (gfc_strlcmp(type, "block") == 0) {
-        slog("spawning enemy block at %f %f", posX, posY);
-        ent = enemy_entity_new(ENEMY_BLOCK, gfc_vector2d(posX, posY));
+        enum_type = ENEMY_BLOCK;
     }
 
+    ent = level_construct_enemy(enum_type, posX, posY, rot);
+    return ent;
+}
+
+Entity* level_construct_enemy(EnemyType type, float posX, float posY, float rot) {
+    Entity* ent = NULL;
+
+    switch (type)
+    {
+    case ENEMY_SAW:
+        slog("spawning enemy saw at %f %f", posX, posY);
+        ent = enemy_entity_new(ENEMY_SAW, gfc_vector2d(posX, posY));
+        break;
+    case ENEMY_BLOCK:
+        slog("spawning enemy block at %f %f", posX, posY);
+        ent = enemy_entity_new(ENEMY_BLOCK, gfc_vector2d(posX, posY));
+        break;
+    }
+
+    if (ent) gfc_list_append(enemies, ent);
     return ent;
 }

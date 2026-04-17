@@ -8,7 +8,8 @@ typedef enum {
     ENEMY_BLOCK,
     ENEMY_CHOMP,
     ENEMY_TURRET,
-    ENEMY_LASER
+    ENEMY_LASER,
+    ENEMY_END
 } EnemyType;
 
 typedef struct {
