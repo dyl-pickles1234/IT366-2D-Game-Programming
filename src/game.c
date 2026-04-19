@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
     //     24
     // );
 
-    Level* level = level_load("levels/showcase.json");
+    Level* level = level_load("levels/saved.json");
     // Level* level = level_load("levels/CantLetGo.json");
 
     if (!level) { slog("bad level"); return 1; }

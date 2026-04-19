@@ -16,21 +16,29 @@ Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
 
     if (!self) { slog("failed to create entity for pad"); return NULL; }
 
+    if (type == PAD_NORMAL) {
+        gfc_line_cpy(self->name, "normal_pad");
+    }
+    else {
+        gfc_line_cpy(self->name, "gravity_pad");
+    }
+
     self->sprite = gf2d_sprite_load_all(
-        "images/ed210.png",
-        128,
-        128,
-        16,
+        "images/player/ball.png",
+        32,
+        32,
+        1,
         false);
 
     self->pos = pos;
-    self->center = gfc_vector2d(64, 96);
-    self->scale = gfc_vector2d(0.25, 0.0625);
+    self->center = gfc_vector2d(16, -80);
+    self->scale = gfc_vector2d(0.6, 0.15);
     self->think = pad_think;
     self->update = pad_update;
 
     self->speed = (type == PAD_NORMAL) ? PAD_NORMAL_BOOST : -1;
     self->hitbox = gfc_rect(pos.x - 8, pos.y - 4, 16, 4);
+    self->hitbox.y += 16;
 
     return self;
 }

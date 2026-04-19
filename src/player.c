@@ -177,6 +177,11 @@ void player_editor_think() {
         objectType++;
         if (objectType == OBJECT_END) objectType = OBJECT_TILE;
     }
+
+    if (gfc_input_key_down("LCTRL") && gfc_input_key_pressed("s")) {
+        level_save("levels/saved.json");
+        slog("saved level");
+    }
 }
 
 void player_editor_update() {
@@ -595,11 +600,13 @@ void player_reset() {
     }
     else {
         player->pos.x = 100;
-        player->pos.y = 564;
+        player->pos.y = 560;
         gravityMult = 1;
         flipped = 0;
         playerMode = PLAYER_CUBE;
     }
+    player->hitbox.x = player->pos.x - 16;
+    player->hitbox.y = player->pos.y - 16;
     slog("player reset");
     SDL_Delay(250);
 }

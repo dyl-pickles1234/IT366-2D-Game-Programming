@@ -89,8 +89,8 @@ void entity_draw(Entity* ent) {
     GFC_Rect hitboxScreen;
     hitboxScreen.w = ent->hitbox.w * camera_get_zoom().x;
     hitboxScreen.h = ent->hitbox.h * camera_get_zoom().y;
-    hitboxScreen.x = pos.x - hitboxScreen.w / 2;
-    hitboxScreen.y = pos.y - hitboxScreen.h / 2;
+    hitboxScreen.x = (ent->hitbox.x + camera_get_offset().x) * camera_get_zoom().x;
+    hitboxScreen.y = (ent->hitbox.y + camera_get_offset().y) * camera_get_zoom().y;
     gf2d_draw_rect(hitboxScreen, GFC_COLOR_DARKRED);
 
     if (ent->draw) {

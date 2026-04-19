@@ -24,6 +24,7 @@ Entity* enemy_entity_new(EnemyType type, GFC_Vector2D pos) {
     switch (type)
     {
     case ENEMY_SAW:
+        gfc_line_cpy(self->name, "saw");
         self->sprite = gf2d_sprite_load_all(
             "images/enemies/saw.png",
             32,
@@ -35,6 +36,7 @@ Entity* enemy_entity_new(EnemyType type, GFC_Vector2D pos) {
         self->hitbox = gfc_rect(pos.x - 16, pos.y - 16, 32, 32);
         break;
     case ENEMY_BLOCK:
+        gfc_line_cpy(self->name, "block");
         self->sprite = gf2d_sprite_load_all(
             "images/enemies/block.png",
             32,

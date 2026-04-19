@@ -11,6 +11,7 @@
 
 static Level* theLevel = NULL;
 
+static GFC_List* objects;
 static GFC_List* enemies;
 
 Level* level_new() {
@@ -19,6 +20,7 @@ Level* level_new() {
     level = gfc_allocate_array(sizeof(Level), 1);
     if (!level) return NULL;
 
+    objects = gfc_list_new();
     enemies = gfc_list_new();
 
     return level;
@@ -63,7 +65,7 @@ Level* level_load(const char* filepath) {
     float speed;
     int numObjects = sj_array_get_count(objectsJson);
     int numEnemies = sj_array_get_count(enemiesJson);
-    GFC_List* objects = gfc_list_new_size(numObjects);
+    GFC_List* objectsJsonList = gfc_list_new_size(numObjects);
     GFC_List* enemiesJsonList = gfc_list_new_size(numEnemies);
 
     sj_get_integer_value(tileWidthJson, &tileWidth);
@@ -75,7 +77,7 @@ Level* level_load(const char* filepath) {
     height = sj_array_get_count(tilemapJson);
 
     for (int i = 0; i < numObjects; i++) {
-        gfc_list_append(objects, sj_array_get_nth(objectsJson, i));
+        gfc_list_append(objectsJsonList, sj_array_get_nth(objectsJson, i));
     }
 
     for (int i = 0; i < numEnemies; i++) {
@@ -118,7 +120,7 @@ Level* level_load(const char* filepath) {
     float rot;
 
     for (int i = 0; i < numObjects; i++) {
-        object = gfc_list_get_nth(objects, i);
+        object = gfc_list_get_nth(objectsJsonList, i);
         strcpy(type, sj_get_string_value(sj_object_get_value(object, "type")));
         sj_get_float_value(sj_array_get_nth(sj_object_get_value(object, "pos"), 0), &posX);
         sj_get_float_value(sj_array_get_nth(sj_object_get_value(object, "pos"), 1), &posY);
@@ -157,6 +159,89 @@ Level* level_load(const char* filepath) {
     sj_free(levelConfigFile);
 
     return level;
+}
+
+void level_save(const char* filepath) {
+    if (!theLevel) return;
+
+    // level's base JSON
+    SJson* levelConfigFile = sj_object_new();
+    SJson* levelConfig = sj_object_new();
+
+    // each property in level (SJson)
+    sj_object_insert(levelConfig, "background", sj_new_str(theLevel->bg->filepath));
+
+    SJson* tilesetJson = sj_object_new();
+    sj_object_insert(tilesetJson, "tilesheet", sj_new_str(theLevel->tileset->filepath));
+    sj_object_insert(tilesetJson, "width", sj_new_int(theLevel->tileWidth));
+    sj_object_insert(tilesetJson, "height", sj_new_int(theLevel->tileHeight));
+    sj_object_insert(tilesetJson, "tilesPerRow", sj_new_int(theLevel->tileset->frames_per_line));
+    sj_object_insert(levelConfig, "tileset", tilesetJson);
+
+    sj_object_insert(levelConfig, "speed", sj_new_float(theLevel->speed));
+
+    SJson* tilemapJson = sj_array_new();
+    for (int j = 0; j < theLevel->height; j++) {
+        SJson* rowJson = sj_array_new();
+        for (int i = 0; i < theLevel->width; i++) {
+            sj_array_append(rowJson, sj_new_int(theLevel->tilemap[level_get_tile_index(theLevel, i, j)]));
+        }
+        sj_array_append(tilemapJson, rowJson);
+    }
+    sj_object_insert(levelConfig, "tilemap", tilemapJson);
+
+    SJson* objectsJson = sj_array_new();
+    for (int i = 0; i < objects->count; i++) {
+        Entity* object = gfc_list_nth(objects, i);
+
+        SJson* objectJson = sj_object_new();
+
+        sj_object_insert(objectJson, "type", sj_new_str(object->name));
+
+        SJson* posJson = sj_array_new();
+
+        // fix up position (tile -> pixel, top-down Y -> bottom-up Y)
+        GFC_Vector2D objSavePos;
+        objSavePos.x = (object->pos.x - 16) / theLevel->tileWidth;
+        objSavePos.y = theLevel->height - ((object->pos.y + 16) / theLevel->tileHeight);
+
+        sj_array_append(posJson, sj_new_float(objSavePos.x));
+        sj_array_append(posJson, sj_new_float(objSavePos.y));
+        sj_object_insert(objectJson, "pos", posJson);
+
+        sj_object_insert(objectJson, "rot", sj_new_float(object->rotation));
+
+        sj_array_append(objectsJson, objectJson);
+    }
+    sj_object_insert(levelConfig, "objects", objectsJson);
+
+    SJson* enemiesJson = sj_array_new();
+    for (int i = 0; i < enemies->count; i++) {
+        Entity* enemy = gfc_list_nth(enemies, i);
+
+        SJson* enemyJson = sj_object_new();
+
+        sj_object_insert(enemyJson, "type", sj_new_str(enemy->name));
+
+        SJson* posJson = sj_array_new();
+
+        // fix up position (tile -> pixel, top-down Y -> bottom-up Y)
+        GFC_Vector2D enemySavePos;
+        enemySavePos.x = (enemy->pos.x - 16) / theLevel->tileWidth;
+        enemySavePos.y = theLevel->height - ((enemy->pos.y + 16) / theLevel->tileHeight);
+
+        sj_array_append(posJson, sj_new_float(enemySavePos.x));
+        sj_array_append(posJson, sj_new_float(enemySavePos.y));
+        sj_object_insert(enemyJson, "pos", posJson);
+
+        sj_array_append(enemiesJson, enemyJson);
+    }
+    sj_object_insert(levelConfig, "enemies", enemiesJson);
+
+    sj_object_insert(levelConfigFile, "level", levelConfig);
+
+    sj_save(levelConfigFile, filepath);
+    sj_free(levelConfigFile);
 }
 
 GFC_List* level_enemies_get() {
@@ -291,63 +376,65 @@ void level_construct_object_from_name(GFC_TextLine type, float posX, float posY,
 }
 
 void level_construct_object(LevelObjectType type, float posX, float posY, float rot) {
+    Entity* obj = NULL;
+
     switch (type)
     {
     case OBJECT_OBJECT_PAD_NORMAL:
-        posY += 16;
         slog("spawning normal pad at %f %f", posX, posY);
-        pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
+        obj = pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PAD_GRAVITY:
-        posY += 16;
         slog("spawning gravity pad at %f %f", posX, posY);
-        pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
+        obj = pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_NORMAL:
         slog("spawning normal orb at %f %f", posX, posY);
-        orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
+        obj = orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_GRAVITY:
         slog("spawning gravity orb at %f %f", posX, posY);
-        orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
+        obj = orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_CUBE:
         slog("spawning cube portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_CUBE, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_CUBE, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_SHIP:
         slog("spawning ship portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_SHIP, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_SHIP, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_BALL:
         slog("spawning ball portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_BALL, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_BALL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_WAVE:
         slog("spawning wave portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_WAVE, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_WAVE, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_UFO:
         slog("spawning ufo portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_GRAVITY_UP:
         slog("spawning gravity up portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_GRAVITY_UP, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_GRAVITY_UP, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_GRAVITY_DOWN:
         slog("spawning gravity down portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_GRAVITY_DOWN, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_GRAVITY_DOWN, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_FLIP_FLIPPED:
         slog("spawning flip flipped portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_FLIP_FLIPPED, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_FLIP_FLIPPED, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_FLIP_NORMAL:
         slog("spawning flip normal portal at %f %f", posX, posY);
-        portal_entity_new(PORTAL_FLIP_NORMAL, gfc_vector2d(posX, posY));
+        obj = portal_entity_new(PORTAL_FLIP_NORMAL, gfc_vector2d(posX, posY));
         break;
     }
+
+    if (obj) gfc_list_append(objects, obj);
 }
 
 Entity* level_construct_enemy_from_name(GFC_TextLine type, float posX, float posY, float rot) {

@@ -16,6 +16,13 @@ Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
 
     if (!self) { slog("failed to create entity for orb"); return NULL; }
 
+    if (type == ORB_NORMAL) {
+        gfc_line_cpy(self->name, "normal_orb");
+    }
+    else {
+        gfc_line_cpy(self->name, "gravity_orb");
+    }
+
     self->sprite = gf2d_sprite_load_all(
         "images/player/cube.png",
         32,

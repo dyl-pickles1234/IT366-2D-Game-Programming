@@ -17,6 +17,36 @@ Entity* portal_entity_new(PortalType type, GFC_Vector2D pos) {
 
     if (!self || !data) { slog("failed to create entity for portal"); return NULL; }
 
+    switch (type) {
+    case PORTAL_CUBE:
+        gfc_line_cpy(self->name, "cube_portal");
+        break;
+    case PORTAL_SHIP:
+        gfc_line_cpy(self->name, "ship_portal");
+        break;
+    case PORTAL_BALL:
+        gfc_line_cpy(self->name, "ball_portal");
+        break;
+    case PORTAL_WAVE:
+        gfc_line_cpy(self->name, "wave_portal");
+        break;
+    case PORTAL_UFO:
+        gfc_line_cpy(self->name, "ufo_portal");
+        break;
+    case PORTAL_GRAVITY_UP:
+        gfc_line_cpy(self->name, "gravity_up_portal");
+        break;
+    case PORTAL_GRAVITY_DOWN:
+        gfc_line_cpy(self->name, "gravity_down_portal");
+        break;
+    case PORTAL_FLIP_FLIPPED:
+        gfc_line_cpy(self->name, "flip_flipped_portal");
+        break;
+    case PORTAL_FLIP_NORMAL:
+        gfc_line_cpy(self->name, "flip_normal_portal");
+        break;
+    }
+
     self->sprite = gf2d_sprite_load_all(
         "images/objects/portal.png",
         32,
