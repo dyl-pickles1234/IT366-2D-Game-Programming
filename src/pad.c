@@ -9,6 +9,7 @@
 #include "pad.h"
 
 #define PAD_NORMAL_BOOST 7.4
+#define PAD_SMALL_BOOST 4.8
 
 Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
     Entity* self;
@@ -18,9 +19,15 @@ Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
 
     if (type == PAD_NORMAL) {
         gfc_line_cpy(self->name, "normal_pad");
+        self->speed = PAD_NORMAL_BOOST;
     }
-    else {
+    else if (type == PAD_SMALL) {
+        gfc_line_cpy(self->name, "small_pad");
+        self->speed = PAD_SMALL_BOOST;
+    }
+    else if (type == PAD_GRAVITY) {
         gfc_line_cpy(self->name, "gravity_pad");
+        self->speed = -1;
     }
 
     self->sprite = gf2d_sprite_load_all(
@@ -36,7 +43,6 @@ Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
     self->think = pad_think;
     self->update = pad_update;
 
-    self->speed = (type == PAD_NORMAL) ? PAD_NORMAL_BOOST : -1;
     self->hitbox = gfc_rect(pos.x - 8, pos.y - 4, 16, 4);
     self->hitbox.y += 16;
 

@@ -5,6 +5,7 @@
 
 typedef enum {
     ORB_NORMAL,
+    ORB_SMALL,
     ORB_GRAVITY
 } OrbType;
 

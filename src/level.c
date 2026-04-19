@@ -335,11 +335,17 @@ void level_construct_object_from_name(GFC_TextLine type, float posX, float posY,
     if (gfc_strlcmp(type, "normal_pad") == 0) {
         enum_type = OBJECT_OBJECT_PAD_NORMAL;
     }
+    else if (gfc_strlcmp(type, "small_pad") == 0) {
+        enum_type = OBJECT_OBJECT_PAD_SMALL;
+    }
     else if (gfc_strlcmp(type, "gravity_pad") == 0) {
         enum_type = OBJECT_OBJECT_PAD_GRAVITY;
     }
     else if (gfc_strlcmp(type, "normal_orb") == 0) {
         enum_type = OBJECT_OBJECT_ORB_NORMAL;
+    }
+    else if (gfc_strlcmp(type, "small_orb") == 0) {
+        enum_type = OBJECT_OBJECT_ORB_SMALL;
     }
     else if (gfc_strlcmp(type, "gravity_orb") == 0) {
         enum_type = OBJECT_OBJECT_ORB_GRAVITY;
@@ -384,6 +390,10 @@ void level_construct_object(LevelObjectType type, float posX, float posY, float 
         slog("spawning normal pad at %f %f", posX, posY);
         obj = pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
         break;
+    case OBJECT_OBJECT_PAD_SMALL:
+        slog("spawning small pad at %f %f", posX, posY);
+        obj = pad_entity_new(PAD_SMALL, gfc_vector2d(posX, posY));
+        break;
     case OBJECT_OBJECT_PAD_GRAVITY:
         slog("spawning gravity pad at %f %f", posX, posY);
         obj = pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
@@ -391,6 +401,10 @@ void level_construct_object(LevelObjectType type, float posX, float posY, float 
     case OBJECT_OBJECT_ORB_NORMAL:
         slog("spawning normal orb at %f %f", posX, posY);
         obj = orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
+        break;
+    case OBJECT_OBJECT_ORB_SMALL:
+        slog("spawning small orb at %f %f", posX, posY);
+        obj = orb_entity_new(ORB_SMALL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_GRAVITY:
         slog("spawning gravity orb at %f %f", posX, posY);

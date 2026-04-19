@@ -5,6 +5,7 @@
 
 typedef enum {
     PAD_NORMAL,
+    PAD_SMALL,
     PAD_GRAVITY
 } PadType;
 

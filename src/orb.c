@@ -9,6 +9,7 @@
 #include "orb.h"
 
 #define ORB_NORMAL_BOOST 5.35
+#define ORB_SMALL_BOOST 3.6
 
 Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
     Entity* self;
@@ -18,9 +19,15 @@ Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
 
     if (type == ORB_NORMAL) {
         gfc_line_cpy(self->name, "normal_orb");
+        self->speed = ORB_NORMAL_BOOST;
     }
-    else {
+    else if (type == ORB_SMALL) {
+        gfc_line_cpy(self->name, "small_orb");
+        self->speed = ORB_SMALL_BOOST;
+    }
+    else if (type == ORB_GRAVITY) {
         gfc_line_cpy(self->name, "gravity_orb");
+        self->speed = -1;
     }
 
     self->sprite = gf2d_sprite_load_all(
@@ -36,7 +43,6 @@ Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
     self->think = orb_think;
     self->update = orb_update;
 
-    self->speed = (type == ORB_NORMAL) ? ORB_NORMAL_BOOST : -1;
     self->hitbox = gfc_rect(pos.x - 32, pos.y - 32, 64, 64);
 
     return self;
