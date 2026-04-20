@@ -156,11 +156,42 @@ void player_editor_think() {
             level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 0;
             break;
         case OBJECT_OBJECT:
-            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
-            // if (!prevLClick) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
+            if (!prevRClick) {
+                GFC_List* objects = level_objects_get();
+                Entity* object;
+                int entityTest;
+
+                for (int i = 0; i < gfc_list_get_count(objects); i++) {
+                    object = gfc_list_get_nth(objects, i);
+                    entityTest = gfc_point_in_rect(mouseInLevel, object->hitbox);
+
+                    if (entityTest) {
+                        slog("deleted entity %s", object->name);
+                        gfc_list_delete_nth(objects, i);
+                        entity_free(object);
+                        break;
+                    }
+                }
+            }
             break;
         case OBJECT_ENEMY:
-            // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
+            if (!prevRClick) {
+                GFC_List* enemies = level_enemies_get();
+                Entity* entity;
+                int entityTest;
+
+                for (int i = 0; i < gfc_list_get_count(enemies); i++) {
+                    entity = gfc_list_get_nth(enemies, i);
+                    entityTest = gfc_point_in_rect(mouseInLevel, entity->hitbox);
+
+                    if (entityTest) {
+                        slog("deleted entity %s", entity->name);
+                        gfc_list_delete_nth(enemies, i);
+                        entity_free(entity);
+                        break;
+                    }
+                }
+            }
             break;
         }
     }

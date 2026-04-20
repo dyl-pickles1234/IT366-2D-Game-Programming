@@ -244,6 +244,10 @@ void level_save(const char* filepath) {
     sj_free(levelConfigFile);
 }
 
+GFC_List* level_objects_get() {
+    return objects;
+}
+
 GFC_List* level_enemies_get() {
     return enemies;
 }
