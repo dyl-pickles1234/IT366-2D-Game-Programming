@@ -1,4 +1,5 @@
 #include <SDL.h>
+
 #include "simple_logger.h"
 
 #include "gfc_input.h"
@@ -11,7 +12,11 @@
 #include "monster.h"
 #include "player.h"
 
+#include "mouseInput.h"
+
 #include "level.h"
+
+#include "text.h"
 
 #define SCREEN_X 1200
 #define SCREEN_Y 768
@@ -23,7 +28,8 @@ int main(int argc, char* argv[])
     int paused = 0;
     const Uint8* keys;
 
-    int mx, my;
+    char FPS_string[8];
+
     float mf = 0;
     Sprite* mouse;
     GFC_Color mouseGFC_Color = gfc_color8(255, 100, 255, 200);
@@ -45,6 +51,7 @@ int main(int argc, char* argv[])
     gf2d_sprite_init(1024);
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
+    text_init();
 
     camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
     camera_set_zoom(2);
@@ -84,28 +91,23 @@ int main(int argc, char* argv[])
     {
         /*update things here*/
         gfc_input_update();
+        mouse_input_update();
         keys = SDL_GetKeyboardState(NULL); // get the keyboard state for this frame
 
         if (gfc_input_key_down("k")) {
             monster_new(gfc_vector2d(gfc_random() * SCREEN_X, gfc_random() * SCREEN_Y));
         }
 
-        Uint32 clicks = SDL_GetMouseState(&mx, &my);
-
-        if (player_flipped_get()) {
-            mx = SCREEN_X - mx;
-        }
-
         mf += 0.1;
         if (mf >= 16.0)mf = 0;
 
         // pause button :P
-        if (mx <= 100 && my <= 100 && clicks & SDL_BUTTON(1) != 0 && !paused) {
+        if (mouse_pos_x() <= 100 && mouse_pos_y() <= 100 && mouse_unclicked(1) && !paused) {
             slog("paused");
             paused = 1;
         }
 
-        if (mx >= 1100 && my <= 100 && clicks & SDL_BUTTON(1) != 0 && paused) {
+        if (mouse_pos_x() >= 1100 && mouse_pos_y() <= 100 && mouse_unclicked(1) != 0 && paused) {
             slog("unpaused");
             paused = 0;
         }
@@ -184,13 +186,16 @@ int main(int argc, char* argv[])
 
         gf2d_sprite_draw(
             mouse,
-            gfc_vector2d(mx, my),
+            gfc_vector2d(mouse_pos_x(), mouse_pos_y()),
             NULL,
             NULL,
             NULL,
             NULL,
             &mouseGFC_Color,
             (int)mf);
+
+        snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
+        text_draw(FPS_string, 32, 100, 100 - 32, GFC_COLOR_WHITE);
 
         // render current draw frame and skip to the next frame
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);

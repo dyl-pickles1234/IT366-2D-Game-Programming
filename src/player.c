@@ -4,6 +4,7 @@
 
 #include "camera.h"
 #include "level.h"
+#include "mouseInput.h"
 
 #include "bullet.h"
 #include "enemy.h"
@@ -43,10 +44,6 @@ static GFC_Vector2D practiceCheckpointPos = { 0 };
 static int practiceCheckpointGravity = 1;
 static Uint8 practiceCheckpointFlipped = 0;
 static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
-
-static int mouseX, mouseY;
-static int prevLClick, prevRClick;
-static int lClick, rClick;
 
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
@@ -120,19 +117,12 @@ void player_editor_think() {
     }
 
     // handle placing things
-    prevLClick = lClick;
-    prevRClick = rClick;
-
-    Uint32 clicks = SDL_GetMouseState(&mouseX, &mouseY);
-    lClick = (clicks & SDL_BUTTON(1)) != 0;
-    rClick = (clicks & SDL_BUTTON(3)) != 0;
-
-    GFC_Vector2D mouseInLevel = gfc_vector2d(mouseX, mouseY);
+    GFC_Vector2D mouseInLevel = mouse_pos_get();
     mouseInLevel.x /= camera_get_zoom().x;
     mouseInLevel.y /= camera_get_zoom().y;
     gfc_vector2d_add(mouseInLevel, mouseInLevel, camera_get_position());
 
-    if (lClick) {
+    if (mouse_down(1)) {
         switch (objectType)
         {
         case OBJECT_TILE:
@@ -140,23 +130,23 @@ void player_editor_think() {
             break;
         case OBJECT_OBJECT:
             // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
-            if (!prevLClick) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
+            if (mouse_clicked(1)) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
             break;
         case OBJECT_ENEMY:
             // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
-            if (!prevLClick) level_construct_enemy(selectedEnemy, mouseInLevel.x, mouseInLevel.y, 0);
+            if (mouse_clicked(1)) level_construct_enemy(selectedEnemy, mouseInLevel.x, mouseInLevel.y, 0);
             break;
         }
     }
 
-    if (rClick) {
+    if (mouse_down(3)) {
         switch (objectType)
         {
         case OBJECT_TILE:
             level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 0;
             break;
         case OBJECT_OBJECT:
-            if (!prevRClick) {
+            if (mouse_clicked(3)) {
                 GFC_List* objects = level_objects_get();
                 Entity* object;
                 int entityTest;
@@ -175,7 +165,7 @@ void player_editor_think() {
             }
             break;
         case OBJECT_ENEMY:
-            if (!prevRClick) {
+            if (mouse_clicked(3)) {
                 GFC_List* enemies = level_enemies_get();
                 Entity* entity;
                 int entityTest;
@@ -260,18 +250,7 @@ void player_think() {
         practiceTimer = PRACTICE_TIMER;
     }
 
-    prevLClick = lClick;
-    prevRClick = rClick;
-
-    Uint32 clicks = SDL_GetMouseState(&mouseX, &mouseY);
-    lClick = (clicks & SDL_BUTTON(1)) != 0;
-    rClick = (clicks & SDL_BUTTON(3)) != 0;
-
-    if (flipped) {
-        mouseX = 1200 - mouseX;
-    }
-
-    GFC_Vector2D mouse = gfc_vector2d(mouseX, mouseY);
+    GFC_Vector2D mouse = mouse_pos_get();
     GFC_Vector2D bulletPos = gfc_vector2d(player->pos.x, player->pos.y);
     GFC_Vector2D playerScreenPos;
     GFC_Vector2D playerToMouse;
@@ -300,7 +279,7 @@ void player_think() {
         }
 
         // left click shoot
-        if (lClick && !prevLClick) {
+        if (mouse_clicked(1)) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             // set speed
@@ -311,7 +290,7 @@ void player_think() {
         }
 
         // right click shoot
-        if (charge >= MAX_CHARGE && rClick && !prevRClick) {
+        if (charge >= MAX_CHARGE && mouse_clicked(3)) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             for (int i = 0; i < 5; i++) {
@@ -341,7 +320,7 @@ void player_think() {
         }
 
         // left click shoot
-        if (lClick && shootTimer <= 0) {
+        if (mouse_down(1) && shootTimer <= 0) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             // set speed
@@ -353,7 +332,7 @@ void player_think() {
         }
 
         // right click shoot
-        if (charge >= 0 && rClick) {
+        if (charge >= 0 && mouse_down(3)) {
             if (shootTimer <= 0) {
                 GFC_Vector2D bulletVel = playerToMouse;
 
@@ -371,7 +350,7 @@ void player_think() {
             charge -= 2;
         }
 
-        if (charge == -1 && rClick && shootTimer <= 0) charge = -100;
+        if (charge == -1 && mouse_down(3) && shootTimer <= 0) charge = -100;
 
         break;
     case PLAYER_BALL:
@@ -389,7 +368,7 @@ void player_think() {
         }
 
         // left click shoot
-        if (lClick && !prevLClick && shootTimer <= 0) {
+        if (mouse_clicked(1) && shootTimer <= 0) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             // set speed
@@ -401,7 +380,7 @@ void player_think() {
         }
 
         // right click shoot
-        if (charge >= MAX_CHARGE && rClick && !prevRClick) {
+        if (charge >= MAX_CHARGE && mouse_clicked(3)) {
             bullet_entity_new("images/objects/bullet.png", bulletPos, 256, gfc_vector2d(0, 0), 0, 2);
             charge = -1;
         }
@@ -424,7 +403,7 @@ void player_think() {
         }
 
         // left click shoot
-        if (lClick && !prevLClick) {
+        if (mouse_clicked(1)) {
             GFC_List* enemies = level_enemies_get();
             Entity* enemy;
             GFC_Vector2D enemyScreenPos;
@@ -454,7 +433,7 @@ void player_think() {
         }
 
         // right click shoot
-        if (charge >= MAX_CHARGE && rClick && !prevRClick) {
+        if (charge >= MAX_CHARGE && mouse_clicked(3)) {
             GFC_List* enemies = level_enemies_get();
             Entity* enemy;
             GFC_Vector2D enemyScreenPos;
@@ -489,7 +468,7 @@ void player_think() {
         }
 
         // left click shoot
-        if (lClick && !prevLClick && shootTimer <= 0) {
+        if (mouse_clicked(1) && shootTimer <= 0) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             // set speed
@@ -501,7 +480,7 @@ void player_think() {
         }
 
         // right click shoot
-        if (charge >= MAX_CHARGE && rClick && !prevRClick) {
+        if (charge >= MAX_CHARGE && mouse_clicked(3)) {
             GFC_Vector2D bulletVel = playerToMouse;
 
             // set speed
@@ -667,7 +646,7 @@ void player_editor_draw(Entity* player) {
 
     GFC_Color alpha = gfc_color(1, 1, 1, 0.5);
 
-    GFC_Vector2D pos = gfc_vector2d(mouseX, mouseY);
+    GFC_Vector2D pos = mouse_pos_get();
     GFC_Vector2D scale = camera_get_zoom();
 
     // project to tiles
