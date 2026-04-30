@@ -16,7 +16,7 @@
 
 #include "level.h"
 
-#include "text.h"
+#include "ui.h"
 
 #define SCREEN_X 1200
 #define SCREEN_Y 768
@@ -84,6 +84,26 @@ int main(int argc, char* argv[])
 
     // monster_new(gfc_vector2d(200, 250));
 
+    // sprite setup
+    Sprite* chargeSprite = gf2d_sprite_load_all(
+        "images/ui/charge.png",
+        32,
+        32,
+        1,
+        false);
+    Sprite* pauseSprite = gf2d_sprite_load_all(
+        "images/ui/pause.png",
+        100,
+        100,
+        1,
+        false);
+    Sprite* playSprite = gf2d_sprite_load_all(
+        "images/ui/play.png",
+        100,
+        100,
+        1,
+        false);
+
     slog("press [escape] to quit");
 
     /*main game loop*/
@@ -102,14 +122,9 @@ int main(int argc, char* argv[])
         if (mf >= 16.0)mf = 0;
 
         // pause button :P
-        if (mouse_pos_x() <= 100 && mouse_pos_y() <= 100 && mouse_unclicked(1) && !paused) {
-            slog("paused");
-            paused = 1;
-        }
-
-        if (mouse_pos_x() >= 1100 && mouse_pos_y() <= 100 && mouse_unclicked(1) != 0 && paused) {
-            slog("unpaused");
-            paused = 0;
+        if (mouse_pos_x() <= 100 && mouse_pos_y() <= 100 && mouse_unclicked(1)) {
+            slog("pause toggle");
+            paused = !paused;
         }
 
         if (!paused) {
@@ -130,13 +145,6 @@ int main(int argc, char* argv[])
         // UI elements last
         float charge = player_charge_get();
         GFC_Vector2D chargeScale = gfc_vector2d(5 * charge, 1);
-        Sprite* chargeSprite = gf2d_sprite_load_all(
-            "images/ui/charge.png",
-            32,
-            32,
-            1,
-            false);
-
         gf2d_sprite_draw(
             chargeSprite,
             gfc_vector2d(50, 100),
@@ -147,42 +155,15 @@ int main(int argc, char* argv[])
             &chargeGFC_Color,
             0);
 
-        if (!paused) {
-            Sprite* pauseSprite = gf2d_sprite_load_all(
-                "images/ui/pause.png",
-                100,
-                100,
-                1,
-                false);
-
-            gf2d_sprite_draw(
-                pauseSprite,
-                gfc_vector2d(0, 0),
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                0);
-        }
-        else {
-            Sprite* playSprite = gf2d_sprite_load_all(
-                "images/ui/play.png",
-                100,
-                100,
-                1,
-                false);
-
-            gf2d_sprite_draw(
-                playSprite,
-                gfc_vector2d(1100, 0),
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                NULL,
-                0);
-        }
+        gf2d_sprite_draw(
+            paused ? playSprite : pauseSprite,
+            gfc_vector2d(0, 0),
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            0);
 
         gf2d_sprite_draw(
             mouse,
@@ -195,7 +176,7 @@ int main(int argc, char* argv[])
             (int)mf);
 
         snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
-        text_draw(FPS_string, 32, 100, 100 - 32, GFC_COLOR_WHITE);
+        text_draw_raw(FPS_string, 32, 100, 100 - 32, GFC_COLOR_WHITE);
 
         // render current draw frame and skip to the next frame
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);

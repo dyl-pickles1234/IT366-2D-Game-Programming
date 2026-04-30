@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "level.h"
 #include "mouseInput.h"
+#include "ui.h"
 
 #include "bullet.h"
 #include "enemy.h"
@@ -519,7 +520,7 @@ void player_update() {
             player_reset();
         }
         player->vel.y = 0;
-        player->pos.y = (int)(player->pos.y / 32) * 32 + 16;
+        player->pos.y = (int)(player->pos.y / 32) * 32 + 16.001;
 
         if (gravityMult < 0) player->pos.y += 0.001;
     }
@@ -684,6 +685,8 @@ void player_editor_draw(Entity* player) {
             32,
             1,
             false);
+
+        text_draw_raw("Palette:", 32, 10, 700, GFC_COLOR_WHITE);
         break;
     case OBJECT_OBJECT:
         GFC_TextLine filename = "images/player/ship.png";
@@ -697,6 +700,8 @@ void player_editor_draw(Entity* player) {
             32,
             1,
             false);
+
+        text_draw_raw("Selected object:", 32, 10, 700, GFC_COLOR_WHITE);
         break;
     case OBJECT_ENEMY:
         sprite = gf2d_sprite_load_all(
@@ -705,6 +710,8 @@ void player_editor_draw(Entity* player) {
             32,
             1,
             false);
+
+        text_draw_raw("Selected enemy:", 32, 10, 700, GFC_COLOR_WHITE);
         break;
     }
 
@@ -717,6 +724,16 @@ void player_editor_draw(Entity* player) {
         NULL,
         &alpha,
         objectType == OBJECT_TILE ? selectedTile - 1 : 0);
+
+    // display name of whatever is selected (this is a small memory leak. But i dont care)
+    char* tok = strtok(SDL_strdup(sprite->filepath), "/");
+    char* saved = tok;
+    while (tok != NULL) {
+        saved = tok;
+        tok = strtok(NULL, "/");
+    }
+
+    text_draw_raw(strtok(SDL_strdup(saved), "."), 24, 10, 732, GFC_COLOR_WHITE);
 }
 
 void player_draw(Entity* player) {
