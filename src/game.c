@@ -103,7 +103,11 @@ int main(int argc, char* argv[])
         100,
         1,
         false);
-
+    
+    // UI setup
+    UIText* editorText = text_new("editor_title", "Level Editor", 18, SCREEN_X/2 - 6*8, 10, GFC_COLOR_WHITE);
+    UIButton* pauseButton = button_new("pause_button", NULL, 0, 0, 100, 100, NULL);
+    
     slog("press [escape] to quit");
 
     /*main game loop*/
@@ -122,7 +126,7 @@ int main(int argc, char* argv[])
         if (mf >= 16.0)mf = 0;
 
         // pause button :P
-        if (mouse_pos_x() <= 100 && mouse_pos_y() <= 100 && mouse_unclicked(1)) {
+        if (button_clicked(pauseButton)) {
             slog("pause toggle");
             paused = !paused;
         }
@@ -156,16 +160,6 @@ int main(int argc, char* argv[])
             0);
 
         gf2d_sprite_draw(
-            paused ? playSprite : pauseSprite,
-            gfc_vector2d(0, 0),
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            NULL,
-            0);
-
-        gf2d_sprite_draw(
             mouse,
             gfc_vector2d(mouse_pos_x(), mouse_pos_y()),
             NULL,
@@ -176,7 +170,12 @@ int main(int argc, char* argv[])
             (int)mf);
 
         snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
-        text_draw_raw(FPS_string, 32, 100, 100 - 32, GFC_COLOR_WHITE);
+        text_draw_raw(FPS_string, 0, 100, 100 - 32, GFC_COLOR_WHITE);
+
+        text_draw(editorText);
+
+        pauseButton->icon = paused ? playSprite : pauseSprite;
+        button_draw(pauseButton);
 
         // render current draw frame and skip to the next frame
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);

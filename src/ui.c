@@ -22,7 +22,7 @@ UIText* text_new(const char* name, const char* text, float size, int x, int y, G
     if (!uiText) return NULL;
 
     gfc_word_cpy(uiText->name, name);
-    gfc_line_cpy(uiText->text, name);
+    gfc_line_cpy(uiText->text, text);
     uiText->fontSize = size;
     uiText->pos = gfc_vector2d(x, y);
     uiText->color = col;
@@ -51,14 +51,38 @@ void text_draw(UIText* text) {
     text_draw_raw(text->text, text->fontSize, text->pos.x, text->pos.y, text->color);
 }
 
+UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, char* label) {
+    UIButton* uiButton = gfc_allocate_array(sizeof(UIButton), 1);
+    if (!uiButton) return NULL;
+
+    gfc_word_cpy(uiButton->name, name);
+    uiButton->icon = gf2d_sprite_load_all(iconPath, 32, 32, 1, false);
+    uiButton->bounds = gfc_rect(x, y, w, h);
+    if (label) uiButton->label = text_new(name, label, uiButton->bounds.h / 4, text_estimate_centered(label, uiButton->bounds.h / 4, x, x + w), y + h / 3, GFC_COLOR_WHITE);
+
+    return uiButton;
+}
+
+void button_free(UIButton* button) {
+    if (button) {
+        if (button->icon) gf2d_sprite_free(button->icon);
+        if (button->label) text_free(button->label);
+        free(button);
+    }
+}
+
 Uint8 button_clicked(UIButton* button) {
     return mouse_clicked(1) && gfc_point_in_rect(mouse_pos_get(), button->bounds);
 }
 
 void button_draw(UIButton* button) {
     // draw icon
+    gf2d_sprite_draw(button->icon,gfc_vector2d(button->bounds.x, button->bounds.y), NULL, NULL, NULL, NULL, NULL, 0);
+
     // draw label
-    // text_draw(button->label)
+    if (button->label) text_draw(button->label);
+
+    //debug draw bounds
     gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
 }
 
@@ -79,3 +103,11 @@ void window_set_active(UIWindow* window);
 UIWindow* window_get_active();
 UIWindow* window_load(const char* filepath);
 void window_free(UIWindow* window);
+
+float text_estimate_width(char* text, int size) {
+    return strlen(text) * size/2;
+}
+
+float text_estimate_centered(char* text, int size, float min, float max) {
+    return min + (max - min) / 2 - text_estimate_width(text, size) / 2;
+}
