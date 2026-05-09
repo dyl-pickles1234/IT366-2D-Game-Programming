@@ -9,6 +9,8 @@
 
 static TTF_Font* font;
 
+static UIWindow* activeWindow;
+
 void text_init() {
     TTF_Init();
     font = TTF_OpenFont("resources/Asap-Regular.ttf", 64);
@@ -21,6 +23,7 @@ UIText* text_new(const char* name, const char* text, float size, int x, int y, G
     UIText* uiText = gfc_allocate_array(sizeof(UIText), 1);
     if (!uiText) return NULL;
 
+    uiText->type = UI_TEXT;
     gfc_word_cpy(uiText->name, name);
     gfc_line_cpy(uiText->text, text);
     uiText->fontSize = size;
@@ -55,6 +58,7 @@ UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w
     UIButton* uiButton = gfc_allocate_array(sizeof(UIButton), 1);
     if (!uiButton) return NULL;
 
+    uiButton->type = UI_BUTTON;
     gfc_word_cpy(uiButton->name, name);
     uiButton->icon = gf2d_sprite_load_all(iconPath, 32, 32, 1, false);
     uiButton->bounds = gfc_rect(x, y, w, h);
@@ -77,7 +81,7 @@ Uint8 button_clicked(UIButton* button) {
 
 void button_draw(UIButton* button) {
     // draw icon
-    gf2d_sprite_draw(button->icon,gfc_vector2d(button->bounds.x, button->bounds.y), NULL, NULL, NULL, NULL, NULL, 0);
+    if (button->icon) gf2d_sprite_draw(button->icon, gfc_vector2d(button->bounds.x, button->bounds.y), NULL, NULL, NULL, NULL, NULL, 0);
 
     // draw label
     if (button->label) text_draw(button->label);
@@ -95,17 +99,67 @@ UIButton* button_find(const char* name, GFC_List* elements) {
     return NULL;
 }
 
+UIWindow* window_new(const char* name, const char* bgPath, int x, int y, int w, int h) {
+    UIWindow* uiWindow = gfc_allocate_array(sizeof(UIWindow), 1);
+    if (!uiWindow) return NULL;
+
+    gfc_word_cpy(uiWindow->name, name);
+    uiWindow->bg = gf2d_sprite_load_image(bgPath);
+    uiWindow->bounds = gfc_rect(x, y, w, h);
+    uiWindow->UIElements = gfc_list_new();
+
+    return uiWindow;
+}
+
 void window_draw(UIWindow* window) {
+    if (!window) return;
+
+    // draw bg
+    if (window->bg) gf2d_sprite_draw_image(window->bg, gfc_vector2d(window->bounds.x, window->bounds.y));
+
+    // draw each UI element
+    for (int i = 0; i < window->UIElements->count; i++) {
+        void* element = gfc_list_get_nth(window->UIElements, i);
+        if (!element) continue;
+
+        UIElementType type = *((UIElementType*)element);
+        switch (type)
+        {
+        case UI_TEXT:
+            text_draw((UIText*)element);
+            break;
+        case UI_BUTTON:
+            button_draw((UIButton*)element);
+            break;
+        }
+    }
+
+    //debug draw bounds
+    gf2d_draw_rect(window->bounds, GFC_COLOR_MAGENTA);
+}
+
+void window_set_active(UIWindow* window) {
+    activeWindow = window;
+}
+
+UIWindow* window_get_active() {
+    return activeWindow;
+}
+
+UIWindow* window_load(const char* filepath) {
 
 }
 
-void window_set_active(UIWindow* window);
-UIWindow* window_get_active();
-UIWindow* window_load(const char* filepath);
-void window_free(UIWindow* window);
+void window_free(UIWindow* window) {
+    if (window) {
+        if (window->bg) gf2d_sprite_free(window->bg);
+        if (window->UIElements) gfc_list_delete(window->UIElements);
+        free(window);
+    }
+}
 
 float text_estimate_width(char* text, int size) {
-    return strlen(text) * size/2;
+    return strlen(text) * size / 2;
 }
 
 float text_estimate_centered(char* text, int size, float min, float max) {

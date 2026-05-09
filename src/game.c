@@ -18,6 +18,7 @@
 
 #include "ui.h"
 
+#define GAME_TITLE "Game Game Game"
 #define SCREEN_X 1200
 #define SCREEN_Y 768
 
@@ -103,12 +104,18 @@ int main(int argc, char* argv[])
         100,
         1,
         false);
-    
+
     // UI setup
-    UIText* editorText = text_new("editor_title", "Level Editor", 18, SCREEN_X/2 - 6*8, 10, GFC_COLOR_WHITE);
+    UIText* editorText = text_new("editor_title", "Level Editor", 18, SCREEN_X / 2 - 6 * 8, 10, GFC_COLOR_WHITE);
     UIButton* pauseButton = button_new("pause_button", NULL, 0, 0, 100, 100, NULL);
-    
-    slog("press [escape] to quit");
+
+    UIWindow* mainMenu = window_new("main_menu", "images/backgrounds/bg_flat.png", 0, 0, SCREEN_X, SCREEN_Y);
+    UIText* titleText = text_new("title", GAME_TITLE, 36, text_estimate_centered(GAME_TITLE, 36, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
+    UIButton* startButton = button_new("start", "images/ui/play.png", SCREEN_X / 2 - 75, SCREEN_Y / 2 - 75, 150, 150, NULL);
+    gfc_list_append(mainMenu->UIElements, titleText);
+    gfc_list_append(mainMenu->UIElements, startButton);
+    window_set_active(mainMenu);
+    slog("press [ctrl+q] to quit");
 
     /*main game loop*/
     while (!done)
@@ -159,6 +166,17 @@ int main(int argc, char* argv[])
             &chargeGFC_Color,
             0);
 
+        snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
+        text_draw_raw(FPS_string, 0, 100, 100 - 32, GFC_COLOR_WHITE);
+
+        text_draw(editorText);
+
+        window_draw(window_get_active());
+
+        pauseButton->icon = paused ? playSprite : pauseSprite;
+        button_draw(pauseButton);
+
+        // mouse should always be on top
         gf2d_sprite_draw(
             mouse,
             gfc_vector2d(mouse_pos_x(), mouse_pos_y()),
@@ -168,14 +186,6 @@ int main(int argc, char* argv[])
             NULL,
             &mouseGFC_Color,
             (int)mf);
-
-        snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
-        text_draw_raw(FPS_string, 0, 100, 100 - 32, GFC_COLOR_WHITE);
-
-        text_draw(editorText);
-
-        pauseButton->icon = paused ? playSprite : pauseSprite;
-        button_draw(pauseButton);
 
         // render current draw frame and skip to the next frame
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);
