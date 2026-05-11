@@ -39,7 +39,7 @@ void text_free(UIText* text) {
 
 void text_draw_raw(const char* text, float size, int x, int y, GFC_Color col) {
     SDL_Color color = { col.r, col.g, col.b, col.a };
-    SDL_Surface* textSurface = TTF_RenderText_Blended(font, text, color);
+    SDL_Surface* textSurface = TTF_RenderUTF8_Blended(font, text, color);
     SDL_Surface* converted = gf2d_graphics_screen_convert(&textSurface);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(gf2d_graphics_get_renderer(), converted);
     SDL_Rect rect = { x, y, converted->w * (size / 64), converted->h * (size / 64) };
@@ -62,7 +62,7 @@ UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w
     gfc_word_cpy(uiButton->name, name);
     uiButton->icon = gf2d_sprite_load_all(iconPath, 32, 32, 1, false);
     uiButton->bounds = gfc_rect(x, y, w, h);
-    if (label) uiButton->label = text_new(name, label, uiButton->bounds.h / 4, text_estimate_centered(label, uiButton->bounds.h / 4, x, x + w), y + h / 3, GFC_COLOR_WHITE);
+    if (label) uiButton->label = text_new(name, label, uiButton->bounds.h / 4, text_center(label, uiButton->bounds.h / 4, x, x + w), y + h / 3, GFC_COLOR_WHITE);
 
     return uiButton;
 }
@@ -76,6 +76,7 @@ void button_free(UIButton* button) {
 }
 
 Uint8 button_clicked(UIButton* button) {
+    if (!button) return 0;
     return mouse_clicked(1) && gfc_point_in_rect(mouse_pos_get(), button->bounds);
 }
 
@@ -97,6 +98,10 @@ UIButton* button_find(const char* name, GFC_List* elements) {
         if (strcasecmp(button->name, name) == 0) return button;
     }
     return NULL;
+}
+
+Uint8 button_clicked_by_name(const char* name) {
+    return button_clicked(button_find(name, window_get_active()->UIElements));
 }
 
 UIWindow* window_new(const char* name, const char* bgPath, int x, int y, int w, int h) {
@@ -158,10 +163,9 @@ void window_free(UIWindow* window) {
     }
 }
 
-float text_estimate_width(char* text, int size) {
-    return strlen(text) * size / 2;
-}
-
-float text_estimate_centered(char* text, int size, float min, float max) {
-    return min + (max - min) / 2 - text_estimate_width(text, size) / 2;
+float text_center(char* text, int size, float min, float max) {
+    int w;
+    if (TTF_SizeUTF8(font, text, &w, NULL) == -1) slog("bad text size grab");
+    w *= ((float)size / 64);
+    return min + (max - min) / 2 - w / 2;
 }

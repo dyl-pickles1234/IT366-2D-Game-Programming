@@ -611,7 +611,8 @@ void player_reset() {
     }
     else {
         player->pos.x = 100;
-        player->pos.y = 560;
+        player->pos.y = level_get()->height * 32 - 32.1f;
+        player->onGround = true;
         gravityMult = 1;
         flipped = 0;
         playerMode = PLAYER_CUBE;
@@ -769,7 +770,7 @@ void player_draw(Entity* player) {
         0);
 }
 
-float player_editor_mode_get() {
+Uint8 player_editor_mode_get() {
     return editorMode;
 }
 

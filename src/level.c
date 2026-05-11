@@ -32,6 +32,14 @@ void level_free(Level* level) {
     gf2d_sprite_free(level->bg);
     gf2d_sprite_free(level->tileset);
 
+    for (int i = 0; i < objects->count; i++) {
+        entity_free(gfc_list_get_nth(objects, i));
+    }
+
+    for (int i = 0; i < enemies->count; i++) {
+        entity_free(gfc_list_get_nth(enemies, i));
+    }
+
     if (level->tilemap) free(level->tilemap);
 
     free(level);

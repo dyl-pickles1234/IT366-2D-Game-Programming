@@ -37,7 +37,7 @@ void player_flipped_set(Uint8 flipped);
 
 float player_charge_get();
 
-float player_editor_mode_get();
+Uint8 player_editor_mode_get();
 void player_editor_mode_set(Uint8 editorMode);
 
 void player_reset();

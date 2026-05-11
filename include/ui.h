@@ -41,14 +41,14 @@ UIText* text_new(const char* name, const char* text, float size, int x, int y, G
 void text_free(UIText* text);
 void text_draw(UIText* text);
 void text_draw_raw(const char* text, float size, int x, int y, GFC_Color col);
-float text_estimate_width(char* text, int size);
-float text_estimate_centered(char* text, int size, float min, float max);
+float text_center(char* text, int size, float min, float max);
 
 UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, char* label);
 void button_free(UIButton* button);
 void button_draw(UIButton* button);
 Uint8 button_clicked(UIButton* button);
 UIButton* button_find(const char* name, GFC_List* elements);
+Uint8 button_clicked_by_name(const char* name);
 
 UIWindow* window_new(const char* name, const char* bgPath, int x, int y, int w, int h);
 void window_free(UIWindow* window);
