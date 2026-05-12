@@ -20,6 +20,8 @@
 
 #include "ui.h"
 
+#include "audio.h"
+
 #define GAME_TITLE "Game Game Game"
 #define SCREEN_X 1200
 #define SCREEN_Y 768
@@ -56,6 +58,17 @@ int main(int argc, char* argv[])
     SDL_ShowCursor(SDL_DISABLE);
     text_init();
     gfc_sound_init_config("config/audio.cfg");
+
+
+
+
+    GFC_Sound* song = gfc_sound_load("audio/music/miku.wav", 1.0, 0);
+
+    get_beats(song);
+    gfc_sound_play(song, 0, 1.0f, -1);
+
+
+
 
     camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
     camera_set_zoom(2);
