@@ -29,6 +29,10 @@ Level* level_new() {
 void level_free(Level* level) {
     if (!level) return;
 
+    Mix_HaltChannel(-1);
+
+    gfc_sound_free(level->song);
+
     gf2d_sprite_free(level->bg);
     gf2d_sprite_free(level->tileset);
 
@@ -54,6 +58,7 @@ Level* level_load(const char* filepath) {
     SJson* levelConfig = sj_object_get_value(levelConfigFile, "level");
 
     // each property in level (SJson)
+    SJson* songJson = sj_object_get_value(levelConfig, "song");
     SJson* bgJson = sj_object_get_value(levelConfig, "background");
     SJson* tilesetJson = sj_object_get_value(levelConfig, "tileset");
     SJson* tilesheetJson = sj_object_get_value(tilesetJson, "tilesheet");
@@ -67,6 +72,7 @@ Level* level_load(const char* filepath) {
     SJson* enemiesJson = sj_object_get_value(levelConfig, "enemies");
 
     // pull out the actual values from JSON
+    const char* songFilename = sj_get_string_value(songJson);
     const char* bgFilename = sj_get_string_value(bgJson);
     const char* tilesheetFilename = sj_get_string_value(tilesheetJson);
     int width, height, tileWidth, tileHeight, tilesPerRow;
@@ -93,6 +99,7 @@ Level* level_load(const char* filepath) {
     }
 
     // configure level with all the loaded info!
+    level->song = gfc_sound_load(songFilename, 0.5f, 0);
     level->bg = gf2d_sprite_load_image(bgFilename);
     level->tileset = gf2d_sprite_load_all(
         tilesheetFilename,
@@ -177,6 +184,7 @@ void level_save(const char* filepath) {
     SJson* levelConfig = sj_object_new();
 
     // each property in level (SJson)
+    sj_object_insert(levelConfig, "song", sj_new_str(theLevel->song->filepath));
     sj_object_insert(levelConfig, "background", sj_new_str(theLevel->bg->filepath));
 
     SJson* tilesetJson = sj_object_new();

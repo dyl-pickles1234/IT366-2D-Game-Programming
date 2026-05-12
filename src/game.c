@@ -4,6 +4,7 @@
 #include "simple_logger.h"
 
 #include "gfc_input.h"
+#include "gfc_audio.h"
 
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
     text_init();
+    gfc_sound_init_config("config/audio.cfg");
 
     camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
     camera_set_zoom(2);
@@ -213,7 +215,7 @@ int main(int argc, char* argv[])
                 sprintf(level_path, "levels/%s.json", level_name);
                 level_set(level_load(level_path));
                 player_editor_mode_get() ? window_set_active(editorUI) : window_set_active(NULL);
-                player_reset();
+                player_reset_no_sound();
                 camera_center_on(player_get()->pos);
                 paused = 0;
             }

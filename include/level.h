@@ -1,12 +1,15 @@
 #ifndef __LEVEL_H__
 #define __LEVEL_H__
 
+#include "gfc_audio.h"
+
 #include "gf2d_sprite.h"
 #include "entity.h"
 
 #include "enemy.h"
 
 typedef struct {
+    GFC_Sound* song;
     Sprite* bg;
     Sprite* tileset; // sprite containing tiles
     Uint8* tilemap; // pointer to tilemap data

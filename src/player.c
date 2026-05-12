@@ -1,6 +1,7 @@
 #include "simple_logger.h"
 
 #include "gfc_input.h"
+#include "gfc_audio.h"
 
 #include "camera.h"
 #include "level.h"
@@ -46,6 +47,8 @@ static int practiceCheckpointGravity = 1;
 static Uint8 practiceCheckpointFlipped = 0;
 static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
 
+GFC_Sound* die_sfx;
+
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
     self = entity_new();
@@ -70,6 +73,8 @@ void player_entity_new(GFC_Vector2D pos) {
     self->hitbox = gfc_rect(pos.x - 16, pos.y - 16, 31, 31);
 
     player = self;
+
+    die_sfx = gfc_sound_load("audio/sfx/die.wav", 1.0f, 0);
 }
 
 void player_editor_think() {
@@ -600,7 +605,7 @@ void player_gravity_set(int newGravity) {
     gravityMult = newGravity;
 }
 
-void player_reset() {
+void player_reset_no_sound() {
     player->vel.x = 0;
     player->vel.y = 0;
     if (practiceMode) {
@@ -619,8 +624,16 @@ void player_reset() {
     }
     player->hitbox.x = player->pos.x - 16;
     player->hitbox.y = player->pos.y - 16;
+
     slog("player reset");
-    SDL_Delay(250);
+    SDL_Delay(500);
+    gfc_sound_play(level_get()->song, 0, 0.5f, -1);
+}
+
+void player_reset() {
+    Mix_HaltChannel(-1);
+    gfc_sound_play(die_sfx, 0, 0.25f, -1);
+    player_reset_no_sound();
 }
 
 void player_mode_set(PlayerMode mode) {
