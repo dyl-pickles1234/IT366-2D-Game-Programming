@@ -20,26 +20,22 @@ Entity* orb_entity_new(OrbType type, GFC_Vector2D pos) {
     if (type == ORB_NORMAL) {
         gfc_line_cpy(self->name, "normal_orb");
         self->speed = ORB_NORMAL_BOOST;
+        self->sprite = gf2d_sprite_load_all("images/objects/orb_normal.png", 32, 32, 1, false);
     }
     else if (type == ORB_SMALL) {
         gfc_line_cpy(self->name, "small_orb");
         self->speed = ORB_SMALL_BOOST;
+        self->sprite = gf2d_sprite_load_all("images/objects/orb_small.png", 32, 32, 1, false);
     }
     else if (type == ORB_GRAVITY) {
         gfc_line_cpy(self->name, "gravity_orb");
         self->speed = -1;
+        self->sprite = gf2d_sprite_load_all("images/objects/orb_gravity.png", 32, 32, 1, false);
     }
-
-    self->sprite = gf2d_sprite_load_all(
-        "images/player/cube.png",
-        32,
-        32,
-        1,
-        false);
 
     self->pos = pos;
     self->center = gfc_vector2d(16, 16);
-    self->scale = gfc_vector2d(0.75, 0.75);
+    self->scale = gfc_vector2d(1, 1);
     self->think = orb_think;
     self->update = orb_update;
 

@@ -20,26 +20,22 @@ Entity* pad_entity_new(PadType type, GFC_Vector2D pos) {
     if (type == PAD_NORMAL) {
         gfc_line_cpy(self->name, "normal_pad");
         self->speed = PAD_NORMAL_BOOST;
+        self->sprite = gf2d_sprite_load_all("images/objects/pad_normal.png", 32, 32, 1, false);
     }
     else if (type == PAD_SMALL) {
         gfc_line_cpy(self->name, "small_pad");
         self->speed = PAD_SMALL_BOOST;
+        self->sprite = gf2d_sprite_load_all("images/objects/pad_small.png", 32, 32, 1, false);
     }
     else if (type == PAD_GRAVITY) {
         gfc_line_cpy(self->name, "gravity_pad");
         self->speed = -1;
+        self->sprite = gf2d_sprite_load_all("images/objects/pad_gravity.png", 32, 32, 1, false);
     }
 
-    self->sprite = gf2d_sprite_load_all(
-        "images/player/ball.png",
-        32,
-        32,
-        1,
-        false);
-
     self->pos = pos;
-    self->center = gfc_vector2d(16, -80);
-    self->scale = gfc_vector2d(0.6, 0.15);
+    self->center = gfc_vector2d(16, 16);
+    self->scale = gfc_vector2d(1, 1);
     self->think = pad_think;
     self->update = pad_update;
 

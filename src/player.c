@@ -661,6 +661,10 @@ float player_charge_get() {
 void player_editor_draw(Entity* player) {
     if (!player) return;
 
+    int size = 32;
+
+    if (objectType == OBJECT_OBJECT && selectedObject >= OBJECT_OBJECT_PORTAL_CUBE) size = 64;
+
     GFC_Color alpha = gfc_color(1, 1, 1, 0.5);
 
     GFC_Vector2D pos = mouse_pos_get();
@@ -677,13 +681,13 @@ void player_editor_draw(Entity* player) {
         pos.y = (int)(pos.y / 32);
     }
     else {
-        pos.x = (pos.x / 32) - 0.5;
-        pos.y = (pos.y / 32) - 0.5;
+        pos.x = (pos.x / size) - 0.5;
+        pos.y = (pos.y / size) - 0.5;
     }
 
     // project back to screen
-    pos.x *= 32;
-    pos.y *= 32;
+    pos.x *= size;
+    pos.y *= size;
 
     gfc_vector2d_sub(pos, pos, camera_get_position());
 
@@ -705,15 +709,58 @@ void player_editor_draw(Entity* player) {
         text_draw_raw("Palette:", 32, 10, 700, GFC_COLOR_WHITE);
         break;
     case OBJECT_OBJECT:
-        GFC_TextLine filename = "images/player/ship.png";
+        GFC_TextLine filename;
 
-        if (selectedObject == OBJECT_OBJECT_PAD_NORMAL) {
-            strcpy(filename, "images/player/ball.png");
+        if (selectedObject == OBJECT_OBJECT_ORB_NORMAL) {
+            strcpy(filename, "images/objects/orb_normal.png");
         }
+        else if (selectedObject == OBJECT_OBJECT_ORB_SMALL) {
+            strcpy(filename, "images/objects/orb_small.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_ORB_GRAVITY) {
+            strcpy(filename, "images/objects/orb_gravity.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PAD_NORMAL) {
+            strcpy(filename, "images/objects/pad_normal.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PAD_SMALL) {
+            strcpy(filename, "images/objects/pad_small.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PAD_GRAVITY) {
+            strcpy(filename, "images/objects/pad_gravity.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_CUBE) {
+            strcpy(filename, "images/objects/portal_cube.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_SHIP) {
+            strcpy(filename, "images/objects/portal_ship.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_BALL) {
+            strcpy(filename, "images/objects/portal_ball.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_WAVE) {
+            strcpy(filename, "images/objects/portal_wave.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_UFO) {
+            strcpy(filename, "images/objects/portal_ufo.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_GRAVITY_UP) {
+            strcpy(filename, "images/objects/portal_gravity_up.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_GRAVITY_DOWN) {
+            strcpy(filename, "images/objects/portal_gravity_down.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_FLIP_FLIPPED) {
+            strcpy(filename, "images/objects/portal_flip_flipped.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_PORTAL_FLIP_NORMAL) {
+            strcpy(filename, "images/objects/portal_flip_normal.png");
+        }
+
         sprite = gf2d_sprite_load_all(
             filename,
-            32,
-            32,
+            selectedObject >= OBJECT_OBJECT_PORTAL_CUBE ? 64 : 32,
+            selectedObject >= OBJECT_OBJECT_PORTAL_CUBE ? 64 : 32,
             1,
             false);
 

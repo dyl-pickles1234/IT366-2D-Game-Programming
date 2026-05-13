@@ -20,55 +20,53 @@ Entity* portal_entity_new(PortalType type, GFC_Vector2D pos) {
     switch (type) {
     case PORTAL_CUBE:
         gfc_line_cpy(self->name, "cube_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_cube.png", 64, 64, 1, false);
         break;
     case PORTAL_SHIP:
         gfc_line_cpy(self->name, "ship_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_ship.png", 64, 64, 1, false);
         break;
     case PORTAL_BALL:
         gfc_line_cpy(self->name, "ball_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_ball.png", 64, 64, 1, false);
         break;
     case PORTAL_WAVE:
         gfc_line_cpy(self->name, "wave_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_wave.png", 64, 64, 1, false);
         break;
     case PORTAL_UFO:
         gfc_line_cpy(self->name, "ufo_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_ufo.png", 64, 64, 1, false);
         break;
     case PORTAL_GRAVITY_UP:
         gfc_line_cpy(self->name, "gravity_up_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_gravity_up.png", 64, 64, 1, false);
         break;
     case PORTAL_GRAVITY_DOWN:
         gfc_line_cpy(self->name, "gravity_down_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_gravity_down.png", 64, 64, 1, false);
         break;
     case PORTAL_FLIP_FLIPPED:
         gfc_line_cpy(self->name, "flip_flipped_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_flip_flipped.png", 64, 64, 1, false);
         break;
     case PORTAL_FLIP_NORMAL:
         gfc_line_cpy(self->name, "flip_normal_portal");
+        self->sprite = gf2d_sprite_load_all("images/objects/portal_flip_normal.png", 64, 64, 1, false);
         break;
     }
 
-    self->sprite = gf2d_sprite_load_all(
-        "images/objects/portal.png",
-        32,
-        32,
-        1,
-        false);
-
     self->pos = pos;
-    self->center = gfc_vector2d(16, 16);
-    self->scale = gfc_vector2d(2, 2);
+    self->center = gfc_vector2d(32, 32);
+    self->scale = gfc_vector2d(1, 1);
     self->think = portal_think;
     self->update = portal_update;
-    self->draw = portal_draw;
+    // self->draw = portal_draw; // no longer necesary to hack this
 
     self->hitbox = gfc_rect(pos.x - 16, pos.y - 32, 32, 64);
 
     data->type = type;
     self->data = data;
-
-    if (type >= PORTAL_GRAVITY_UP) {
-        self->scale.x *= 0.5;
-    }
 
     return self;
 }
