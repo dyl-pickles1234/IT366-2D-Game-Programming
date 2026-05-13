@@ -60,7 +60,20 @@ int main(int argc, char* argv[])
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
     text_init();
+
+    // gotta do some wacky stuff to get audio right
     gfc_sound_init_config("config/audio.cfg");
+    Mix_CloseAudio();
+    if (Mix_OpenAudioDevice(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 64, NULL, 0) == -1)
+    {
+        slog("Failed to open audio: %s\n", SDL_GetError());
+    }
+    int freq;
+    Uint16 fmt;
+    int chann;
+    Mix_QuerySpec(&freq, &fmt, &chann);
+    slog("Mix Query: %i %X %i", freq, fmt, chann);
+    // done wth wacky audio stuff
 
     GFC_List* beats = NULL;
     if (beat_visualization) {
@@ -206,7 +219,7 @@ int main(int argc, char* argv[])
             entity_manager_update_all();
         }
 
-        if (!level_get()) {
+        if (!level_get() && !window_get_active()) {
             selectedLevel = -1;
             window_set_active(levelSelect);
         }
@@ -296,7 +309,8 @@ int main(int argc, char* argv[])
                 gf2d_draw_line(gfc_vector2d(((int)gfc_list_get_nth(beats, i)) / scale, SCREEN_Y / 3), gfc_vector2d(((int)gfc_list_get_nth(beats, i)) / scale, SCREEN_Y / 3 * 2), GFC_COLOR_DARKCYAN);
             }
             gf2d_draw_circle(gfc_vector2d(x, SCREEN_Y / 2), 5, GFC_COLOR_CYAN);
-            x += 0.565;
+            // x += 0.565; // PC
+            x += 0.485; // laptop
         }
 
         // render current draw frame and skip to the next frame

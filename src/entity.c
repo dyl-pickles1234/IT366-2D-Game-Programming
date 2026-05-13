@@ -85,13 +85,13 @@ void entity_draw(Entity* ent) {
         NULL,
         (Uint32)ent->frame);
 
-    // debug draw all hitboxes
-    GFC_Rect hitboxScreen;
-    hitboxScreen.w = ent->hitbox.w * camera_get_zoom().x;
-    hitboxScreen.h = ent->hitbox.h * camera_get_zoom().y;
-    hitboxScreen.x = (ent->hitbox.x + camera_get_offset().x) * camera_get_zoom().x;
-    hitboxScreen.y = (ent->hitbox.y + camera_get_offset().y) * camera_get_zoom().y;
-    gf2d_draw_rect(hitboxScreen, GFC_COLOR_DARKRED);
+    // // debug draw all hitboxes
+    // GFC_Rect hitboxScreen;
+    // hitboxScreen.w = ent->hitbox.w * camera_get_zoom().x;
+    // hitboxScreen.h = ent->hitbox.h * camera_get_zoom().y;
+    // hitboxScreen.x = (ent->hitbox.x + camera_get_offset().x) * camera_get_zoom().x;
+    // hitboxScreen.y = (ent->hitbox.y + camera_get_offset().y) * camera_get_zoom().y;
+    // gf2d_draw_rect(hitboxScreen, GFC_COLOR_DARKRED);
 
     if (ent->draw) {
         ent->draw(ent);

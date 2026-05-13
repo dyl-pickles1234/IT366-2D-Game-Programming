@@ -87,8 +87,8 @@ void button_draw(UIButton* button) {
     // draw label
     if (button->label) text_draw(button->label);
 
-    //debug draw bounds
-    gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
+    // //debug draw bounds
+    // gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
 }
 
 UIButton* button_find(const char* name, GFC_List* elements) {
@@ -139,8 +139,8 @@ void window_draw(UIWindow* window) {
         }
     }
 
-    //debug draw bounds
-    gf2d_draw_rect(window->bounds, GFC_COLOR_MAGENTA);
+    // //debug draw bounds
+    // gf2d_draw_rect(window->bounds, GFC_COLOR_MAGENTA);
 }
 
 void window_set_active(UIWindow* window) {
