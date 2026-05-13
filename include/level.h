@@ -10,6 +10,7 @@
 
 typedef struct {
     GFC_Sound* song;
+    GFC_List* beats;
     Sprite* bg;
     Sprite* tileset; // sprite containing tiles
     Uint8* tilemap; // pointer to tilemap data

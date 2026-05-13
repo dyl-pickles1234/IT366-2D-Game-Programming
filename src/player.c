@@ -625,14 +625,16 @@ void player_reset_no_sound() {
     player->hitbox.x = player->pos.x - 16;
     player->hitbox.y = player->pos.y - 16;
 
+    player_editor_mode_set(0);
+
     slog("player reset");
-    SDL_Delay(500);
-    gfc_sound_play(level_get()->song, 0, 0.5f, -1);
+    gfc_sound_play(level_get()->song, 0, 0.1f, -1);
 }
 
 void player_reset() {
     Mix_HaltChannel(-1);
     gfc_sound_play(die_sfx, 0, 0.25f, -1);
+    SDL_Delay(500);
     player_reset_no_sound();
 }
 

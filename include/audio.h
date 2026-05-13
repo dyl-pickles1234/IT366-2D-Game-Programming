@@ -5,6 +5,6 @@
 
 #include "gfc_audio.h"
 
-void get_beats(GFC_Sound* music);
+GFC_List* get_beats(GFC_Sound* music);
 
 #endif

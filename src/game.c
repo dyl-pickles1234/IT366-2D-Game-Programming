@@ -6,6 +6,7 @@
 #include "gfc_input.h"
 #include "gfc_audio.h"
 
+#include "gf2d_draw.h"
 #include "gf2d_graphics.h"
 #include "gf2d_sprite.h"
 
@@ -29,6 +30,8 @@
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
+    Uint8 beat_visualization = false;
+
     int done = 0;
     int paused = 1;
     const Uint8* keys;
@@ -59,16 +62,16 @@ int main(int argc, char* argv[])
     text_init();
     gfc_sound_init_config("config/audio.cfg");
 
-
-
-
-    GFC_Sound* song = gfc_sound_load("audio/music/miku.wav", 1.0, 0);
-
-    get_beats(song);
-    gfc_sound_play(song, 0, 1.0f, -1);
-
-
-
+    GFC_List* beats = NULL;
+    if (beat_visualization) {
+        // GFC_Sound* song = gfc_sound_load("audio/music/blast.wav", 1.0, 0);
+        GFC_Sound* song = gfc_sound_load("audio/music/miku.wav", 1.0, 0);
+        // GFC_Sound* song = gfc_sound_load("audio/music/pig.wav", 1.0, 0);
+        // slog("%i", SDL_GetTicks());
+        beats = get_beats(song);
+        // slog("%i", SDL_GetTicks());
+        gfc_sound_play(song, 0, 0.1f, -1);
+    }
 
     camera_set_dimension(gfc_vector2d(SCREEN_X, SCREEN_Y));
     camera_set_zoom(2);
@@ -126,10 +129,10 @@ int main(int argc, char* argv[])
     UIText* editorText = text_new("editor_title", "Level Editor", 18, SCREEN_X / 2 - 6 * 8, 10, GFC_COLOR_WHITE);
     gfc_list_append(editorUI->UIElements, editorText);
 
-    UIWindow* mainMenu = window_new("main_menu", "images/backgrounds/bg_flat.png", 0, 0, SCREEN_X, SCREEN_Y);
-    UIText* titleText = text_new("title", GAME_TITLE, 36, text_center(GAME_TITLE, 36, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
-    UIButton* startButton = button_new("start_button", "images/ui/play.png", SCREEN_X / 2 - 75, SCREEN_Y / 2 - 75, 150, 150, NULL);
-    gfc_list_append(mainMenu->UIElements, titleText);
+    UIWindow* mainMenu = window_new("main_menu", "images/backgrounds/main_menu.jpg", 0, 0, SCREEN_X, SCREEN_Y);
+    // UIText* titleText = text_new("title", GAME_TITLE, 36, text_center(GAME_TITLE, 36, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
+    UIButton* startButton = button_new("start_button", NULL, SCREEN_X / 2 - 75, SCREEN_Y / 2 - 75, 150, 150, NULL);
+    // gfc_list_append(mainMenu->UIElements, titleText);
     gfc_list_append(mainMenu->UIElements, startButton);
 
     UIWindow* levelSelect = window_new("level_select", "images/ui/level_select.png", 0, 0, SCREEN_X, SCREEN_Y);
@@ -142,7 +145,12 @@ int main(int argc, char* argv[])
     gfc_list_append(levelSelect->UIElements, leftButton);
     gfc_list_append(levelSelect->UIElements, rightButton);
 
-    window_set_active(mainMenu);
+    if (beat_visualization) {
+        window_set_active(editorUI);
+    }
+    else {
+        window_set_active(mainMenu);
+    }
 
     slog("press [ctrl+q] to quit");
 
@@ -169,6 +177,8 @@ int main(int argc, char* argv[])
         }
     }
     closedir(dir);
+
+    float x = 0.0f;
 
     /*main game loop*/
     while (!done)
@@ -275,6 +285,15 @@ int main(int argc, char* argv[])
             &mouseGFC_Color,
             (int)mf);
 
+        if (beat_visualization) {
+            for (int i = 0; i < beats->count; i++) {
+                float scale = 750;
+                gf2d_draw_line(gfc_vector2d(((int)gfc_list_get_nth(beats, i)) / scale, SCREEN_Y / 3), gfc_vector2d(((int)gfc_list_get_nth(beats, i)) / scale, SCREEN_Y / 3 * 2), GFC_COLOR_DARKCYAN);
+            }
+            gf2d_draw_circle(gfc_vector2d(x, SCREEN_Y / 2), 5, GFC_COLOR_CYAN);
+            x += 0.565;
+        }
+
         // render current draw frame and skip to the next frame
         SDL_SetRenderTarget(gf2d_graphics_get_renderer(), NULL);
 
@@ -288,9 +307,17 @@ int main(int argc, char* argv[])
         if (keys[SDL_SCANCODE_UP]) camera_set_zoom(camera_get_zoom().x + 0.01);
         if (keys[SDL_SCANCODE_DOWN]) camera_set_zoom(camera_get_zoom().x - 0.01);
 
-        if (gfc_input_key_pressed("t")) {
+        if (gfc_input_key_pressed("t") && level_get()) {
+            Mix_HaltChannel(-1);
             player_editor_mode_set(player_editor_mode_get() == 1 ? 0 : 1);
-            player_editor_mode_get() ? window_set_active(editorUI) : window_set_active(NULL);
+
+            if (player_editor_mode_get()) {
+                window_set_active(editorUI);
+            }
+            else {
+                // player_reset_no_sound();
+                window_set_active(NULL);
+            }
         }
 
         if (keys[SDL_SCANCODE_LCTRL] && keys[SDL_SCANCODE_Q])done = 1; // exit condition (lctrl+q)

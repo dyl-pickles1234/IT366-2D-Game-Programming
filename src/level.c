@@ -1,6 +1,8 @@
 #include "simple_logger.h"
 #include "simple_json.h"
 
+#include "gf2d_draw.h"
+
 #include "camera.h"
 #include "level.h"
 
@@ -8,6 +10,8 @@
 #include "orb.h"
 #include "portal.h"
 #include "enemy.h"
+#include "player.h"
+#include "audio.h"
 
 static Level* theLevel = NULL;
 
@@ -43,6 +47,8 @@ void level_free(Level* level) {
     for (int i = 0; i < enemies->count; i++) {
         entity_free(gfc_list_get_nth(enemies, i));
     }
+
+    gfc_list_delete(level->beats);
 
     if (level->tilemap) free(level->tilemap);
 
@@ -100,6 +106,7 @@ Level* level_load(const char* filepath) {
 
     // configure level with all the loaded info!
     level->song = gfc_sound_load(songFilename, 0.5f, 0);
+    level->beats = get_beats(level->song);
     level->bg = gf2d_sprite_load_image(bgFilename);
     level->tileset = gf2d_sprite_load_all(
         tilesheetFilename,
@@ -318,6 +325,18 @@ void level_draw(Level* level) {
 
     if (level->bg) {
         gf2d_sprite_draw_image(level->bg, gfc_vector2d(0, 0));
+    }
+
+    if (player_editor_mode_get()) {
+        GFC_Vector2D scale = camera_get_zoom();
+        GFC_Vector2D offset = camera_get_offset();
+        offset = gfc_vector2d_multiply(offset, scale);
+
+        for (int i = 0; i < level->beats->count; i++) {
+            float scl = 427 / level->speed; // magic numbers hell yeah
+            float off = 100;
+            gf2d_draw_line(gfc_vector2d((((int)gfc_list_get_nth(level->beats, i)) / scl + off) * scale.x + offset.x, 0), gfc_vector2d((((int)gfc_list_get_nth(level->beats, i)) / scl + off) * scale.x + offset.x, 768), GFC_COLOR_DARKCYAN);
+        }
     }
 
     if (level->tileset) {
