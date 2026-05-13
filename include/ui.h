@@ -42,6 +42,7 @@ void text_free(UIText* text);
 void text_draw(UIText* text);
 void text_draw_raw(const char* text, float size, int x, int y, GFC_Color col);
 float text_center(char* text, int size, float min, float max);
+UIText* text_find(const char* name, GFC_List* elements);
 
 UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, char* label);
 void button_free(UIButton* button);

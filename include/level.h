@@ -18,6 +18,7 @@ typedef struct {
     Uint32 width, height; // size of tilemap
     Uint32 tileWidth, tileHeight; // size of tile
     float speed;
+    Uint8* coins;
 } Level;
 
 typedef enum {
@@ -27,6 +28,7 @@ typedef enum {
     OBJECT_OBJECT_PAD_NORMAL,
     OBJECT_OBJECT_PAD_SMALL,
     OBJECT_OBJECT_PAD_GRAVITY,
+    OBJECT_OBJECT_COIN,
     OBJECT_OBJECT_PORTAL_CUBE,
     OBJECT_OBJECT_PORTAL_SHIP,
     OBJECT_OBJECT_PORTAL_BALL,
@@ -95,8 +97,8 @@ void level_free(Level* level);
  */
 void level_draw(Level* level);
 
-void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot);
-void level_construct_object(LevelObjectType type, float posX, float posY, float rot);
+void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot, void* data);
+void level_construct_object(LevelObjectType type, float posX, float posY, float rot, void* data);
 
 Entity* level_construct_enemy_from_name(GFC_TextLine type, float posX, float posY, float rot);
 Entity* level_construct_enemy(EnemyType type, float posX, float posY, float rot);

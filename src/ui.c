@@ -54,6 +54,15 @@ void text_draw(UIText* text) {
     text_draw_raw(text->text, text->fontSize, text->pos.x, text->pos.y, text->color);
 }
 
+UIText* text_find(const char* name, GFC_List* elements) {
+    UIText* text;
+    for (int i = 0; i < elements->count; i++) {
+        text = gfc_list_get_nth(elements, i);
+        if (strcasecmp(text->name, name) == 0 && text->type == UI_TEXT) return text;
+    }
+    return NULL;
+}
+
 UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, char* label) {
     UIButton* uiButton = gfc_allocate_array(sizeof(UIButton), 1);
     if (!uiButton) return NULL;
@@ -88,7 +97,7 @@ void button_draw(UIButton* button) {
     if (button->label) text_draw(button->label);
 
     // //debug draw bounds
-    // gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
+    gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
 }
 
 UIButton* button_find(const char* name, GFC_List* elements) {

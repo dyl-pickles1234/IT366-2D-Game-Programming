@@ -2,6 +2,7 @@
 #define __PLAYER_H__
 
 #include "entity.h"
+#include "gfc_hashmap.h"
 
 typedef enum {
     PLAYER_CUBE = 0,
@@ -18,6 +19,14 @@ typedef enum {
     OBJECT_ENEMY,
     OBJECT_END
 } ObjectType;
+
+typedef enum {
+    UPGRADE_1 = 0,
+    UPGRADE_2,
+    UPGRADE_3,
+    UPGRADE_4,
+    UPGRADE_5
+} UpgradeType;
 
 void player_entity_new(GFC_Vector2D pos);
 void player_think();
@@ -42,4 +51,13 @@ void player_editor_mode_set(Uint8 editorMode);
 
 void player_reset_no_sound();
 void player_reset();
+
+void player_add_coin(Uint8 index);
+Uint32 player_get_coin_count();
+GFC_HashMap* player_get_level_coins();
+
+Uint8 player_owns_upgrade(UpgradeType upgrade);
+void player_buy_upgrade(UpgradeType upgrade);
+Uint8 player_get_upgrade_cost(UpgradeType upgrade);
+
 #endif

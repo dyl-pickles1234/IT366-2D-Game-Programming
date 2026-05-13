@@ -50,6 +50,16 @@ static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
 GFC_Sound* die_sfx;
 GFC_Sound* win_sfx;
 
+GFC_HashMap* levelCoins;
+Uint8* thisLevelCoins;
+Uint32 coinsSpent = 0;
+
+// costs for upgrades (will be data-driven eventually)
+Uint8 upgradeCosts[5] = { 2, 2, 2, 2, 2 };
+
+// whether each upgrade is unlocked
+Uint8 upgrades[5] = { 0, 0, 0, 0, 0 };
+
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
     self = entity_new();
@@ -77,6 +87,9 @@ void player_entity_new(GFC_Vector2D pos) {
 
     die_sfx = gfc_sound_load("audio/sfx/die.wav", 1.0f, 0);
     win_sfx = gfc_sound_load("audio/sfx/victory.wav", 1.0f, 0);
+
+    levelCoins = gfc_hashmap_new();
+    thisLevelCoins = gfc_allocate_array(sizeof(Uint8), 3);
 }
 
 void player_editor_think() {
@@ -138,7 +151,23 @@ void player_editor_think() {
             break;
         case OBJECT_OBJECT:
             // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
-            if (mouse_clicked(1)) level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0);
+            void* data = NULL;
+            if (mouse_clicked(1)) {
+                if (selectedObject == OBJECT_OBJECT_COIN) {
+                    int freeCoin = -1;
+                    for (int i = 0; i < 3; i++) {
+                        if (!level->coins[i]) {
+                            freeCoin = i;
+                            break;
+                        }
+                    }
+                    // if all coins are used, cant spawn new ones
+                    if (freeCoin == -1) break;
+                    data = (void*)freeCoin;
+                    level->coins[freeCoin] = 1;
+                }
+                level_construct_object(selectedObject, mouseInLevel.x, mouseInLevel.y, 0, data);
+            }
             break;
         case OBJECT_ENEMY:
             // level->tilemap[level_get_tile_index(level, mouseInLevel.x / 32, mouseInLevel.y / 32)] = 2;
@@ -165,6 +194,10 @@ void player_editor_think() {
 
                     if (entityTest) {
                         slog("deleted entity %s", object->name);
+                        if (gfc_stricmp(object->name, "coin") == 0) {
+                            Uint8 index = (Uint8)object->data;
+                            level->coins[index] = 0;
+                        }
                         gfc_list_delete_nth(objects, i);
                         entity_free(object);
                         break;
@@ -229,8 +262,11 @@ void player_think() {
 
     GFC_Vector2D move = { 0 };
 
-    move.x += player->speed * gfc_input_key_down("d");
-    move.x -= player->speed * gfc_input_key_down("a");
+    // movement can only happen with upgrade
+    if (upgrades[UPGRADE_1]) {
+        move.x += player->speed * gfc_input_key_down("d");
+        move.x -= player->speed * gfc_input_key_down("a");
+    }
 
     if (flipped) move.x *= -1;
 
@@ -598,6 +634,10 @@ void player_update() {
         slog("You Win!");
         gfc_sound_play(win_sfx, 0, 0.25f, -1);
         SDL_Delay(1000);
+        Uint8* savedCoins = gfc_hashmap_get(levelCoins, level_get()->filepath);
+        savedCoins[0] = thisLevelCoins[0];
+        savedCoins[1] = thisLevelCoins[1];
+        savedCoins[2] = thisLevelCoins[2];
         level_free(level_get());
         level_set(NULL);
     }
@@ -637,7 +677,19 @@ void player_reset_no_sound() {
 
     player_editor_mode_set(0);
 
-    slog("player reset");
+    Uint8* saved_coins = gfc_hashmap_get(levelCoins, level_get()->filepath);
+    thisLevelCoins[0] = saved_coins[0];
+    thisLevelCoins[1] = saved_coins[1];
+    thisLevelCoins[2] = saved_coins[2];
+
+    GFC_TextLine path;
+    gfc_line_cpy(path, level_get()->filepath);
+    level_free(level_get());
+    level_set(level_load(path));
+
+    // slog("coins: %i", player_get_coin_count());
+
+    // slog("player reset");
     gfc_sound_play(level_get()->song, 0, 0.1f, -1);
 }
 
@@ -738,6 +790,9 @@ void player_editor_draw(Entity* player) {
         }
         else if (selectedObject == OBJECT_OBJECT_PAD_GRAVITY) {
             strcpy(filename, "images/objects/pad_gravity.png");
+        }
+        else if (selectedObject == OBJECT_OBJECT_COIN) {
+            strcpy(filename, "images/objects/coin.png");
         }
         else if (selectedObject == OBJECT_OBJECT_PORTAL_CUBE) {
             strcpy(filename, "images/objects/portal_cube.png");
@@ -847,7 +902,7 @@ Uint8 player_editor_mode_get() {
 }
 
 void player_editor_mode_set(Uint8 editor) {
-    slog("switching editor mode - %i", editor);
+    // slog("switching editor mode - %i", editor);
     editorMode = editor;
     if (editor) {
         player->think = player_editor_think;
@@ -859,4 +914,43 @@ void player_editor_mode_set(Uint8 editor) {
         player->update = player_update;
         player->draw = player_draw;
     }
+}
+
+void player_add_coin(Uint8 index) {
+    thisLevelCoins[index] = 1;
+    slog("collected coins in this level: [%i %i %i]", thisLevelCoins[0], thisLevelCoins[1], thisLevelCoins[2]);
+}
+
+Uint32 player_get_coin_count() {
+    int coinCount = 0;
+
+    GFC_HashElement* item;
+    GFC_List* items = gfc_hashmap_get_all_values(levelCoins);
+    for (int i = 0; i < gfc_list_get_count(items); i++) {
+        item = gfc_list_get_nth(items, i);
+        if (((Uint8*)(item->data))[0]) coinCount++;
+        if (((Uint8*)(item->data))[1]) coinCount++;
+        if (((Uint8*)(item->data))[2]) coinCount++;
+    }
+    gfc_list_delete(items);
+
+    return coinCount - coinsSpent;
+}
+
+GFC_HashMap* player_get_level_coins() {
+    return levelCoins;
+}
+
+Uint8 player_owns_upgrade(UpgradeType upgrade) {
+    return upgrades[upgrade];
+}
+
+void player_buy_upgrade(UpgradeType upgrade) {
+    upgrades[upgrade] = 1;
+    coinsSpent += upgradeCosts[upgrade];
+    slog("Coins remaining: %i", player_get_coin_count());
+}
+
+Uint8 player_get_upgrade_cost(UpgradeType upgrade) {
+    return upgradeCosts[upgrade];
 }

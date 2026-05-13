@@ -12,6 +12,7 @@
 #include "enemy.h"
 #include "player.h"
 #include "audio.h"
+#include "coin.h"
 
 static Level* theLevel = NULL;
 
@@ -27,6 +28,8 @@ Level* level_new() {
     objects = gfc_list_new();
     enemies = gfc_list_new();
 
+    level->coins = gfc_allocate_array(sizeof(Uint8), 3);
+
     return level;
 }
 
@@ -34,6 +37,8 @@ void level_free(Level* level) {
     if (!level) return;
 
     Mix_HaltChannel(-1);
+
+    free(level->coins);
 
     gfc_sound_free(level->song);
 
@@ -85,8 +90,8 @@ Level* level_load(const char* filepath) {
     float speed;
     int numObjects = sj_array_get_count(objectsJson);
     int numEnemies = sj_array_get_count(enemiesJson);
-    GFC_List* objectsJsonList = gfc_list_new_size(numObjects);
-    GFC_List* enemiesJsonList = gfc_list_new_size(numEnemies);
+    GFC_List* objectsJsonList = gfc_list_new_size(numObjects + 1);
+    GFC_List* enemiesJsonList = gfc_list_new_size(numEnemies + 1);
 
     sj_get_integer_value(tileWidthJson, &tileWidth);
     sj_get_integer_value(tileHeightJson, &tileHeight);
@@ -141,6 +146,7 @@ Level* level_load(const char* filepath) {
     GFC_TextLine type;
     float posX, posY;
     float rot;
+    void* data = NULL; // optional; only used for coin
 
     for (int i = 0; i < numObjects; i++) {
         object = gfc_list_get_nth(objectsJsonList, i);
@@ -149,12 +155,26 @@ Level* level_load(const char* filepath) {
         sj_get_float_value(sj_array_get_nth(sj_object_get_value(object, "pos"), 1), &posY);
         sj_get_float_value(sj_object_get_value(object, "rot"), &rot);
 
+        if (gfc_stricmp(type, "coin") == 0) {
+            int index;
+            sj_get_integer_value(sj_object_get_value(object, "index"), &index);
+
+            // store the fact that this coin exists
+            level->coins[index] = 1;
+
+            // but don't spawn it if collected
+            Uint8* collectedCoins = gfc_hashmap_get(player_get_level_coins(), filepath);
+            if (collectedCoins[index]) continue;
+
+            data = (void*)index;
+        }
+
         // fix up position (tile -> pixel, top-down Y -> bottom-up Y)
         posX = posX * 32 + 16;
         posY = (level->height - posY) * 32 - 16;
 
         // construct entity
-        level_construct_object_from_name(type, posX, posY, rot);
+        level_construct_object_from_name(type, posX, posY, rot, data);
     }
 
     // create necessary enemies
@@ -234,6 +254,10 @@ void level_save(const char* filepath) {
         sj_object_insert(objectJson, "pos", posJson);
 
         sj_object_insert(objectJson, "rot", sj_new_float(object->rotation));
+
+        if (gfc_stricmp(object->name, "coin") == 0) {
+            sj_object_insert(objectJson, "index", sj_new_int((Uint8)object->data));
+        }
 
         sj_array_append(objectsJson, objectJson);
     }
@@ -369,7 +393,7 @@ void level_draw(Level* level) {
     }
 }
 
-void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot) {
+void level_construct_object_from_name(GFC_TextLine type, float posX, float posY, float rot, void* data) {
     LevelObjectType enum_type = OBJECT_OBJECT_END;
 
     if (gfc_strlcmp(type, "normal_pad") == 0) {
@@ -389,6 +413,9 @@ void level_construct_object_from_name(GFC_TextLine type, float posX, float posY,
     }
     else if (gfc_strlcmp(type, "gravity_orb") == 0) {
         enum_type = OBJECT_OBJECT_ORB_GRAVITY;
+    }
+    else if (gfc_strlcmp(type, "coin") == 0) {
+        enum_type = OBJECT_OBJECT_COIN;
     }
     else if (gfc_strlcmp(type, "cube_portal") == 0) {
         enum_type = OBJECT_OBJECT_PORTAL_CUBE;
@@ -418,72 +445,76 @@ void level_construct_object_from_name(GFC_TextLine type, float posX, float posY,
         enum_type = OBJECT_OBJECT_PORTAL_FLIP_NORMAL;
     }
 
-    level_construct_object(enum_type, posX, posY, rot);
+    level_construct_object(enum_type, posX, posY, rot, data);
 }
 
-void level_construct_object(LevelObjectType type, float posX, float posY, float rot) {
+void level_construct_object(LevelObjectType type, float posX, float posY, float rot, void* data) {
     Entity* obj = NULL;
 
     switch (type)
     {
     case OBJECT_OBJECT_PAD_NORMAL:
-        slog("spawning normal pad at %f %f", posX, posY);
+        // slog("spawning normal pad at %f %f", posX, posY);
         obj = pad_entity_new(PAD_NORMAL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PAD_SMALL:
-        slog("spawning small pad at %f %f", posX, posY);
+        // slog("spawning small pad at %f %f", posX, posY);
         obj = pad_entity_new(PAD_SMALL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PAD_GRAVITY:
-        slog("spawning gravity pad at %f %f", posX, posY);
+        // slog("spawning gravity pad at %f %f", posX, posY);
         obj = pad_entity_new(PAD_GRAVITY, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_NORMAL:
-        slog("spawning normal orb at %f %f", posX, posY);
+        // slog("spawning normal orb at %f %f", posX, posY);
         obj = orb_entity_new(ORB_NORMAL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_SMALL:
-        slog("spawning small orb at %f %f", posX, posY);
+        // slog("spawning small orb at %f %f", posX, posY);
         obj = orb_entity_new(ORB_SMALL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_ORB_GRAVITY:
-        slog("spawning gravity orb at %f %f", posX, posY);
+        // slog("spawning gravity orb at %f %f", posX, posY);
         obj = orb_entity_new(ORB_GRAVITY, gfc_vector2d(posX, posY));
         break;
+    case OBJECT_OBJECT_COIN:
+        // slog("spawning coin at %f %f with index %i", posX, posY, (Uint8)data);
+        obj = coin_entity_new(gfc_vector2d(posX, posY), (Uint8)data);
+        break;
     case OBJECT_OBJECT_PORTAL_CUBE:
-        slog("spawning cube portal at %f %f", posX, posY);
+        // slog("spawning cube portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_CUBE, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_SHIP:
-        slog("spawning ship portal at %f %f", posX, posY);
+        // slog("spawning ship portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_SHIP, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_BALL:
-        slog("spawning ball portal at %f %f", posX, posY);
+        // slog("spawning ball portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_BALL, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_WAVE:
-        slog("spawning wave portal at %f %f", posX, posY);
+        // slog("spawning wave portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_WAVE, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_UFO:
-        slog("spawning ufo portal at %f %f", posX, posY);
+        // slog("spawning ufo portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_UFO, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_GRAVITY_UP:
-        slog("spawning gravity up portal at %f %f", posX, posY);
+        // slog("spawning gravity up portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_GRAVITY_UP, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_GRAVITY_DOWN:
-        slog("spawning gravity down portal at %f %f", posX, posY);
+        // slog("spawning gravity down portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_GRAVITY_DOWN, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_FLIP_FLIPPED:
-        slog("spawning flip flipped portal at %f %f", posX, posY);
+        // slog("spawning flip flipped portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_FLIP_FLIPPED, gfc_vector2d(posX, posY));
         break;
     case OBJECT_OBJECT_PORTAL_FLIP_NORMAL:
-        slog("spawning flip normal portal at %f %f", posX, posY);
+        // slog("spawning flip normal portal at %f %f", posX, posY);
         obj = portal_entity_new(PORTAL_FLIP_NORMAL, gfc_vector2d(posX, posY));
         break;
     }
@@ -512,11 +543,11 @@ Entity* level_construct_enemy(EnemyType type, float posX, float posY, float rot)
     switch (type)
     {
     case ENEMY_SAW:
-        slog("spawning enemy saw at %f %f", posX, posY);
+        // slog("spawning enemy saw at %f %f", posX, posY);
         ent = enemy_entity_new(ENEMY_SAW, gfc_vector2d(posX, posY));
         break;
     case ENEMY_BLOCK:
-        slog("spawning enemy block at %f %f", posX, posY);
+        // slog("spawning enemy block at %f %f", posX, posY);
         ent = enemy_entity_new(ENEMY_BLOCK, gfc_vector2d(posX, posY));
         break;
     }

@@ -153,10 +153,24 @@ int main(int argc, char* argv[])
     UIButton* levelButton = button_new("level_button", NULL, 274, 150, 652, 200, "<placeholder>");
     UIButton* leftButton = button_new("left_button", "images/ui/play.png", 62, SCREEN_Y / 2 - 75, 150, 150, NULL);
     UIButton* rightButton = button_new("right_button", "images/ui/play.png", SCREEN_X - 62 - 150, SCREEN_Y / 2 - 75, 150, 150, NULL);
+    UIButton* shopButton = button_new("shop_button", NULL, SCREEN_X / 2 - 50, SCREEN_Y - 200, 100, 100, "Shop");
     // gfc_list_append(levelSelect->UIElements, levelText);
     gfc_list_append(levelSelect->UIElements, levelButton);
     gfc_list_append(levelSelect->UIElements, leftButton);
     gfc_list_append(levelSelect->UIElements, rightButton);
+    gfc_list_append(levelSelect->UIElements, shopButton);
+
+    UIWindow* shopMenu = window_new("shop", "images/backgrounds/geometrydash.png", 0, 0, SCREEN_X, SCREEN_Y);
+    UIText* shopText = text_new("shop_title", "Purchase Upgrades", 48, text_center("Purchase Upgrades", 48, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
+    UIText* coinText = text_new("coin_text", "Coins: ", 36, text_center("Coins: ", 36, 0, SCREEN_X), 150, GFC_COLOR_WHITE);
+    UIButton* upgradeButton1 = button_new("upgrade_button1", NULL, SCREEN_X / 5 - SCREEN_X / 10, 450, 100, 100, "Upgrade 1");
+    UIText* costText1 = text_new("cost_text1", "Cost: ", 24, SCREEN_X / 5 - SCREEN_X / 10, 550, GFC_COLOR_WHITE);
+    snprintf(costText1->text, GFCLINELEN, "Cost: %i", player_get_upgrade_cost(UPGRADE_1));
+    // gfc_list_append(levelSelect->UIElements, levelText);
+    gfc_list_append(shopMenu->UIElements, shopText);
+    gfc_list_append(shopMenu->UIElements, coinText);
+    gfc_list_append(shopMenu->UIElements, upgradeButton1);
+    gfc_list_append(shopMenu->UIElements, costText1);
 
     if (beat_visualization) {
         window_set_active(editorUI);
@@ -230,7 +244,23 @@ int main(int argc, char* argv[])
             }
         }
 
-        if (selectedLevel == -1) {
+        if (window_get_active() == shopMenu) {
+            snprintf(coinText->text, GFCLINELEN, "Coins: %i", player_get_coin_count());
+            if (player_owns_upgrade(UPGRADE_1)) {
+                gfc_line_cpy(button_find("upgrade_button1", shopMenu->UIElements)->label->text, "Purchased");
+                gfc_line_cpy(text_find("cost_text1", shopMenu->UIElements)->text, " ");
+            }
+            else if (button_clicked_by_name("upgrade_button1") && player_get_coin_count() > player_get_upgrade_cost(UPGRADE_1)) {
+                player_buy_upgrade(UPGRADE_1);
+            }
+        }
+
+        if (window_get_active() == levelSelect && selectedLevel == -1) {
+            // shop button
+            if (button_clicked_by_name("shop_button")) {
+                window_set_active(shopMenu);
+            }
+
             // cycle levels
             if (button_clicked_by_name("right_button")) {
                 levelID++;
@@ -254,7 +284,15 @@ int main(int argc, char* argv[])
 
                 char level_path[256] = { 0 };
                 sprintf(level_path, "levels/%s.json", level_name);
+
+                // set coins for level
+                GFC_HashMap* levelCoins = player_get_level_coins();
+                if (!gfc_hashmap_get(levelCoins, level_path)) {
+                    gfc_hashmap_insert(levelCoins, level_path, gfc_allocate_array(sizeof(Uint8), 3));
+                }
+
                 level_set(level_load(level_path));
+
                 player_editor_mode_get() ? window_set_active(editorUI) : window_set_active(NULL);
                 player_reset_no_sound();
                 camera_center_on(player_get()->pos);
