@@ -48,6 +48,7 @@ static Uint8 practiceCheckpointFlipped = 0;
 static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
 
 GFC_Sound* die_sfx;
+GFC_Sound* win_sfx;
 
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
@@ -75,6 +76,7 @@ void player_entity_new(GFC_Vector2D pos) {
     player = self;
 
     die_sfx = gfc_sound_load("audio/sfx/die.wav", 1.0f, 0);
+    win_sfx = gfc_sound_load("audio/sfx/victory.wav", 1.0f, 0);
 }
 
 void player_editor_think() {
@@ -206,7 +208,7 @@ void player_editor_think() {
     }
 
     if (gfc_input_key_down("LCTRL") && gfc_input_key_pressed("s")) {
-        level_save("levels/saved.json");
+        level_save(level->filepath);
         slog("saved level");
     }
 }
@@ -591,6 +593,14 @@ void player_update() {
     }
 
     camera_center_on(cameraFocus);
+
+    if (player->pos.x >= (level_get()->width - 3) * 32) {
+        slog("You Win!");
+        gfc_sound_play(win_sfx, 0, 0.25f, -1);
+        SDL_Delay(1000);
+        level_free(level_get());
+        level_set(NULL);
+    }
 }
 
 Entity* player_get() {

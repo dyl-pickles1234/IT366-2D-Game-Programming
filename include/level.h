@@ -9,6 +9,7 @@
 #include "enemy.h"
 
 typedef struct {
+    GFC_TextLine filepath;
     GFC_Sound* song;
     GFC_List* beats;
     Sprite* bg;

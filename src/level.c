@@ -105,6 +105,7 @@ Level* level_load(const char* filepath) {
     }
 
     // configure level with all the loaded info!
+    gfc_line_cpy(level->filepath, filepath);
     level->song = gfc_sound_load(songFilename, 0.5f, 0);
     level->beats = get_beats(level->song);
     level->bg = gf2d_sprite_load_image(bgFilename);
@@ -327,7 +328,7 @@ void level_draw(Level* level) {
         gf2d_sprite_draw_image(level->bg, gfc_vector2d(0, 0));
     }
 
-    if (player_editor_mode_get()) {
+    if (player_editor_mode_get() && level->beats) {
         GFC_Vector2D scale = camera_get_zoom();
         GFC_Vector2D offset = camera_get_offset();
         offset = gfc_vector2d_multiply(offset, scale);

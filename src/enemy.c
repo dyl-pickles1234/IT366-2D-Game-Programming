@@ -109,7 +109,7 @@ void enemy_think(Entity* enemy) {
 }
 
 void enemy_update(Entity* enemy) {
-    if (!enemy) return;
+    if (!enemy || !level_get()) return;
 
     // do collision checks for permission
     GFC_Rect levelVCheck = enemy->hitbox;

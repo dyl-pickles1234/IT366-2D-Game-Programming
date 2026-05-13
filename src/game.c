@@ -206,6 +206,11 @@ int main(int argc, char* argv[])
             entity_manager_update_all();
         }
 
+        if (!level_get()) {
+            selectedLevel = -1;
+            window_set_active(levelSelect);
+        }
+
         if (window_get_active() == mainMenu) {
             if (button_clicked_by_name("start_button")) {
                 window_set_active(levelSelect);
