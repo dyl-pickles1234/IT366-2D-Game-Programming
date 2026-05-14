@@ -67,4 +67,8 @@ void player_buy_upgrade(UpgradeType upgrade);
 Uint8 player_get_upgrade_cost(UpgradeType upgrade);
 void player_get_upgrade_name(UpgradeType upgrade, char* textOut);
 
+Uint8 player_get_slowmo();
+Uint8 player_get_shield();
+void player_break_shield();
+
 #endif

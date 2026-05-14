@@ -7,15 +7,15 @@
         },
         {
             "name": "Cooldown",
+            "cost": 2
+        },
+        {
+            "name": "Shielding",
+            "cost": 1
+        },
+        {
+            "name": "Slow-Mo!",
             "cost": 3
-        },
-        {
-            "name": "Upgrade3",
-            "cost": 1
-        },
-        {
-            "name": "Upgrade4",
-            "cost": 1
         },
         {
             "name": "Upgrade5",

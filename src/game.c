@@ -27,6 +27,19 @@
 #define SCREEN_X 1200
 #define SCREEN_Y 768
 
+void delay(void* udata, Uint8* stream, int len) {
+    // for (int i = len - 1; i >= 0; i -= 2) {
+
+    //     stream[i] = stream[(i / 2) - ((i / 2) % 2)];
+    //     // stream[i - 1] = stream[(i - 1) / 2];
+    // }
+
+    // magic number for getting slowmo effect to work on audio thread
+    for (Uint32 i = 0; i < UINT32_MAX / 500; i++) {
+        continue;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
@@ -342,6 +355,13 @@ int main(int argc, char* argv[])
         }
         else {
             gf2d_graphics_next_frame();
+        }
+
+        if (player_get_slowmo()) {
+            // magic number for getting slowmo effect to work on main thread
+            for (Uint32 i = 0; i < UINT32_MAX / 90; i++) {
+                continue;
+            }
         }
 
         if (keys[SDL_SCANCODE_UP]) camera_set_zoom(camera_get_zoom().x + 0.01);

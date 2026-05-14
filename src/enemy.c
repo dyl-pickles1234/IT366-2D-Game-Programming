@@ -71,9 +71,15 @@ void enemy_think(Entity* enemy) {
     playerTest = gfc_rect_overlap(enemy->hitbox, player->hitbox);
 
     if (playerTest) {
-        slog("kille dplayer");
-        player_reset();
-        return;
+        if (player_get_shield()) {
+            // slog("shielded");
+            player_break_shield();
+        }
+        else {
+            // slog("kille dplayer");
+            player_reset();
+            return;
+        }
     }
 
     GFC_Rect groundCheck = enemy->hitbox;

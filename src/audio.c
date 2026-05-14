@@ -5,7 +5,7 @@
 GFC_List* get_beats(GFC_Sound* music) {
   if (!music) return NULL;
 
-  slog("%s has %i samples", music->filepath, music->sound->alen / 2 / 2); // 16-bit & stereo
+  // slog("%s has %i samples", music->filepath, music->sound->alen / 2 / 2); // 16-bit & stereo
 
   float lenvelope = 0.0f;
   float renvelope = 0.0f;

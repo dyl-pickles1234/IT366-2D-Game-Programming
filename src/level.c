@@ -358,7 +358,7 @@ void level_draw(Level* level) {
         offset = gfc_vector2d_multiply(offset, scale);
 
         for (int i = 0; i < level->beats->count; i++) {
-            float scl = 427 / level->speed; // magic numbers hell yeah
+            float scl = 360 / level->speed; // magic numbers hell yeah
             float off = 100;
             gf2d_draw_line(gfc_vector2d((((int)gfc_list_get_nth(level->beats, i)) / scl + off) * scale.x + offset.x, 0), gfc_vector2d((((int)gfc_list_get_nth(level->beats, i)) / scl + off) * scale.x + offset.x, 768), GFC_COLOR_DARKCYAN);
         }

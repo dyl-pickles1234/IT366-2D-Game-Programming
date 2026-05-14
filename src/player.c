@@ -57,6 +57,11 @@ Uint32 coinsSpent = 0;
 
 GFC_List* upgrades;
 
+Uint8 slowmo = false;
+
+Uint8 hasShield = false;
+int iFrames = -1;
+
 void upgrades_load(const char* filepath);
 
 void player_entity_new(GFC_Vector2D pos) {
@@ -291,6 +296,7 @@ void player_editor_update() {
     camera_center_on(cameraFocus);
 }
 
+void delay(void* udata, Uint8* stream, int len);
 void player_think() {
     if (!player) return;
 
@@ -318,6 +324,11 @@ void player_think() {
 
     if (gfc_input_key_pressed("p")) {
         practiceMode = practiceMode ? 0 : 1;
+    }
+
+    if (gfc_input_key_pressed("TAB") && player_owns_upgrade(UPGRADE_4) && charge > 0) {
+        slowmo = true;
+        Mix_SetPostMix(delay, NULL);
     }
 
     if (practiceMode && player->onGround && practiceTimer <= 0) {
@@ -577,7 +588,19 @@ void player_think() {
         break;
     }
 
-    if (charge < MAX_CHARGE) charge += player_owns_upgrade(UPGRADE_2) ? 2 : 1;
+    if (slowmo) {
+        if (charge > 0) charge--;
+        else {
+            slowmo = false;
+            Mix_SetPostMix(NULL, NULL);
+        }
+    }
+    else if (charge < MAX_CHARGE) charge += player_owns_upgrade(UPGRADE_2) ? 2 : 1;
+
+    if (iFrames > 0) iFrames--;
+
+    if (iFrames == 0 && hasShield) hasShield = false;
+
     if (practiceTimer > 0) practiceTimer--;
 }
 
@@ -709,6 +732,12 @@ void player_reset_no_sound() {
     player->hitbox.x = player->pos.x - 16;
     player->hitbox.y = player->pos.y - 16;
 
+    charge = 0;
+    slowmo = false;
+    Mix_SetPostMix(NULL, NULL);
+    if (player_owns_upgrade(UPGRADE_3)) hasShield = true; else hasShield = false;
+    iFrames = -1;
+
     player_editor_mode_set(0);
 
     Uint8* saved_coins = gfc_hashmap_get(levelCoins, level_get()->filepath);
@@ -728,6 +757,7 @@ void player_reset_no_sound() {
 }
 
 void player_reset() {
+    Mix_SetPostMix(NULL, NULL);
     Mix_HaltChannel(-1);
     gfc_sound_play(die_sfx, 0, 0.25f, -1);
     SDL_Delay(500);
@@ -993,4 +1023,16 @@ Uint8 player_get_upgrade_cost(UpgradeType upgrade) {
 
 void player_get_upgrade_name(UpgradeType upgrade, char* textOut) {
     gfc_word_cpy(textOut, ((Upgrade*)gfc_list_get_nth(upgrades, upgrade))->name);
+}
+
+Uint8 player_get_slowmo() {
+    return slowmo;
+}
+
+Uint8 player_get_shield() {
+    return hasShield;
+}
+
+void player_break_shield() {
+    if (iFrames < 0) iFrames = 100;
 }
