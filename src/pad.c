@@ -59,7 +59,7 @@ void pad_think(Entity* pad) {
         }
         else { // treat as gravity pad
             player_gravity_set(-1 * grav);
-            player->vel.y = -4;
+            player->vel.y = -PAD_NORMAL_BOOST * grav;
         }
     }
 }

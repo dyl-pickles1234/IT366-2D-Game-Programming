@@ -302,6 +302,7 @@ int main(int argc, char* argv[])
         }
 
         if (window_get_active() == window_get("shop")) {
+            if (gfc_input_key_down("c")) player_add_debug_coin();
             snprintf(text_find("coin_text", window_get_active()->UIElements)->text, GFCLINELEN, "Coins: %i", player_get_coin_count());
             for (int i = 0; i < 5; i++) {
                 GFC_TextLine buttonName;
@@ -576,6 +577,7 @@ int main(int argc, char* argv[])
         if (gfc_input_key_pressed("t") && level_get()) {
             Mix_HaltChannel(-1);
             player_editor_mode_set(player_editor_mode_get() == 1 ? 0 : 1);
+            level_save(level_get()->filepath);
 
             if (player_editor_mode_get()) {
                 window_set_active(window_get("editor_ui"));

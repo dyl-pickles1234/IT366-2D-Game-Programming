@@ -58,7 +58,7 @@ void orb_think(Entity* orb) {
         }
         else { // treat as gravity orb
             player_gravity_set(-1 * grav);
-            player->vel.y = -4 * grav;
+            player->vel.y = -2 * grav;
         }
     }
 }

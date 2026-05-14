@@ -6,9 +6,9 @@
 typedef enum {
     ENEMY_SAW = 0,
     ENEMY_BLOCK,
-    ENEMY_CHOMP,
-    ENEMY_TURRET,
-    ENEMY_LASER,
+    // ENEMY_CHOMP,
+    // ENEMY_TURRET,
+    // ENEMY_LASER,
     ENEMY_END
 } EnemyType;
 

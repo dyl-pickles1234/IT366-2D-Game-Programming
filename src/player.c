@@ -13,10 +13,10 @@
 
 #include "player.h"
 
-#define PLAYER_SPEED 2
+#define PLAYER_SPEED 1
 
 #define CUBE_JUMP_SPEED 5.05
-#define SHIP_BOOST_SPEED 0.3
+#define SHIP_BOOST_SPEED 0.275
 #define UFO_JUMP_SPEED 3.15
 
 #define CUBE_GRAVITY 0.19
@@ -53,7 +53,7 @@ GFC_Sound* coin_sfx;
 
 GFC_HashMap* levelCoins;
 Uint8* thisLevelCoins;
-Uint32 coinsSpent = 0;
+int coinsSpent = 0;
 
 GFC_List* upgrades;
 
@@ -175,11 +175,11 @@ void player_editor_think() {
         }
         else if (objectType == OBJECT_OBJECT) {
             selectedObject--;
-            if (selectedObject == 0) selectedObject = OBJECT_OBJECT_END - 1;
+            if (selectedObject == -1) selectedObject = OBJECT_OBJECT_END - 1;
         }
         else if (objectType == OBJECT_ENEMY) {
             selectedEnemy--;
-            if (selectedEnemy == 0) selectedEnemy = ENEMY_END - 1;
+            if (selectedEnemy == -1) selectedEnemy = ENEMY_END - 1;
         }
     }
 
@@ -922,8 +922,21 @@ void player_editor_draw(Entity* player) {
         text_draw_raw("Selected object:", 32, 10, 700, GFC_COLOR_WHITE);
         break;
     case OBJECT_ENEMY:
+        GFC_TextLine e_filename;
+
+        if (selectedEnemy == ENEMY_SAW) {
+            strcpy(e_filename, "images/enemies/saw.png");
+        }
+        else if (selectedEnemy == ENEMY_BLOCK) {
+            strcpy(e_filename, "images/enemies/block.png");
+            scale.x *= 0.5;
+            scale.y *= 0.5;
+            pos.x += 16;
+            pos.y += 16;
+        }
+
         sprite = gf2d_sprite_load_all(
-            "images/tiles/geometry_dash.png",
+            e_filename,
             32,
             32,
             1,
@@ -1076,6 +1089,7 @@ void player_editor_mode_set(Uint8 editor) {
         player->draw = player_editor_draw;
     }
     else {
+        player->speed = PLAYER_SPEED;
         player->think = player_think;
         player->update = player_update;
         player->draw = player_draw;
@@ -1086,6 +1100,10 @@ void player_add_coin(Uint8 index) {
     gfc_sound_play(coin_sfx, 0, 0.25f, 1);
     thisLevelCoins[index] = 1;
     // slog("collected coins in this level: [%i %i %i]", thisLevelCoins[0], thisLevelCoins[1], thisLevelCoins[2]);
+}
+
+void player_add_debug_coin() {
+    coinsSpent--;
 }
 
 Uint32 player_get_coin_count() {

@@ -368,9 +368,10 @@ void level_draw(Level* level) {
         int index;
         Uint8 tile;
         GFC_Vector2D scale = camera_get_zoom();
+        int player_tile = player_get()->pos.x / 32;
 
         for (int j = 0; j < level->height; j++) {
-            for (int i = 0; i < level->width; i++) {
+            for (int i = MAX(0, player_tile - 15); i < MIN(level->width, player_tile + 20); i++) {
                 index = level_get_tile_index(level, i, j);
                 if (index < 0) continue;
                 tile = level->tilemap[index];

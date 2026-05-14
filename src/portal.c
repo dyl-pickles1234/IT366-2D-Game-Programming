@@ -84,9 +84,11 @@ void portal_think(Entity* portal) {
             player_mode_set(data->type);
         }
         else if (data->type == PORTAL_GRAVITY_UP) {
+            player->vel.y *= 0.96;
             player_gravity_set(-1);
         }
         else if (data->type == PORTAL_GRAVITY_DOWN) {
+            player->vel.y *= 0.96;
             player_gravity_set(1);
         }
         else if (data->type == PORTAL_FLIP_FLIPPED) {

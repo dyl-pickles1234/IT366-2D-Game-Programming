@@ -61,6 +61,7 @@ void player_reset();
 void player_add_coin(Uint8 index);
 Uint32 player_get_coin_count();
 GFC_HashMap* player_get_level_coins();
+void player_add_debug_coin();
 
 Uint8 player_owns_upgrade(UpgradeType upgrade);
 void player_buy_upgrade(UpgradeType upgrade);
