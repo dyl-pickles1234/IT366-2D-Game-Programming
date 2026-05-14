@@ -71,4 +71,10 @@ Uint8 player_get_slowmo();
 Uint8 player_get_shield();
 void player_break_shield();
 
+GFC_Vector4D player_get_customization();
+void player_set_customization(Uint8 h, Uint8 f, Uint8 s, float hu);
+
+Uint8 player_get_bullet();
+void player_set_bullet(Uint8 b);
+
 #endif

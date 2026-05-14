@@ -62,6 +62,13 @@ Uint8 slowmo = false;
 Uint8 hasShield = false;
 int iFrames = -1;
 
+Uint8 hat = 0;
+Uint8 face = 0;
+Uint8 shape = 0;
+float hue = 0;
+Uint8 bullet = 0;
+GFC_TextLine bullet_path = "images/objects/bullet0.png";
+
 void upgrades_load(const char* filepath);
 
 void player_entity_new(GFC_Vector2D pos) {
@@ -71,15 +78,15 @@ void player_entity_new(GFC_Vector2D pos) {
     if (!self) { slog("failed to create entity for player"); return; }
 
     self->sprite = gf2d_sprite_load_all(
-        "images/player/cube.png",
-        32,
-        32,
+        "images/player/shape0.png",
+        64,
+        64,
         1,
         false);
 
     self->pos = pos;
-    self->center = gfc_vector2d(16, 16);
-    self->scale = gfc_vector2d(1, 1);
+    self->center = gfc_vector2d(32, 32);
+    self->scale = gfc_vector2d(0.5, 0.5);
     self->think = player_think;
     self->update = player_update;
     self->draw = player_draw;
@@ -375,7 +382,7 @@ void player_think() {
             gfc_vector2d_scale(bulletVel, bulletVel, 8);
             // gfc_vector2d_add(bulletVel, bulletVel, player->vel);
 
-            bullet_entity_new("images/objects/bullet.png", bulletPos, 16, bulletVel, 0, -1);
+            bullet_entity_new(bullet_path, bulletPos, 16, bulletVel, 0, -1);
         }
 
         // right click shoot
@@ -389,7 +396,7 @@ void player_think() {
                 gfc_vector2d_scale(bulletVelRand, bulletVel, gfc_random() + 5);
 
                 bulletVelRand = gfc_vector2d_rotate(bulletVelRand, gfc_random() * 0.5 - 0.25);
-                bullet_entity_new("images/objects/bullet.png", bulletPos, 8, bulletVelRand, 0, -1);
+                bullet_entity_new(bullet_path, bulletPos, 8, bulletVelRand, 0, -1);
             }
 
             charge = -1;
@@ -416,7 +423,7 @@ void player_think() {
             gfc_vector2d_scale(bulletVel, bulletVel, 3);
             gfc_vector2d_add(bulletVel, bulletVel, player->vel);
 
-            bullet_entity_new("images/objects/bullet.png", bulletPos, 8, bulletVel, 0, -1);
+            bullet_entity_new(bullet_path, bulletPos, 8, bulletVel, 0, -1);
             shootTimer = 15;
         }
 
@@ -432,7 +439,7 @@ void player_think() {
                     gfc_vector2d_scale(bulletVelRand, bulletVel, gfc_random() + 2);
 
                     bulletVelRand = gfc_vector2d_rotate(bulletVelRand, gfc_random() * 0.5 - 0.25);
-                    bullet_entity_new("images/objects/bullet.png", bulletPos, 8, bulletVelRand, 0, -1);
+                    bullet_entity_new(bullet_path, bulletPos, 8, bulletVelRand, 0, -1);
                 }
                 shootTimer = 15;
             }
@@ -464,13 +471,13 @@ void player_think() {
             gfc_vector2d_scale(bulletVel, bulletVel, 1);
             gfc_vector2d_add(bulletVel, bulletVel, player->vel);
 
-            bullet_entity_new("images/objects/bullet.png", bulletPos, 64, bulletVel, 0, -1);
+            bullet_entity_new(bullet_path, bulletPos, 64, bulletVel, 0, -1);
             shootTimer = 120;
         }
 
         // right click shoot
         if (charge >= MAX_CHARGE && mouse_clicked(3)) {
-            bullet_entity_new("images/objects/bullet.png", bulletPos, 256, gfc_vector2d(0, 0), 0, 2);
+            bullet_entity_new(bullet_path, bulletPos, 256, gfc_vector2d(0, 0), 0, 2);
             charge = -1;
         }
 
@@ -564,7 +571,7 @@ void player_think() {
             gfc_vector2d_scale(bulletVel, bulletVel, 3);
             gfc_vector2d_add(bulletVel, bulletVel, player->vel);
 
-            bullet_entity_new("images/objects/bullet.png", bulletPos, 32, bulletVel, 1, -1);
+            bullet_entity_new(bullet_path, bulletPos, 32, bulletVel, 1, -1);
             shootTimer = 120;
         }
 
@@ -579,7 +586,7 @@ void player_think() {
                 bulletVel = gfc_vector2d_rotate(bulletVel, 10 * GFC_DEGTORAD);
                 GFC_Vector2D thisVel = bulletVel;
                 gfc_vector2d_add(thisVel, thisVel, player->vel);
-                bullet_entity_new("images/objects/bullet.png", bulletPos, 8, thisVel, 0, -1);
+                bullet_entity_new(bullet_path, bulletPos, 8, thisVel, 0, -1);
             }
 
             charge = -1;
@@ -698,6 +705,23 @@ void player_update() {
         level_free(level_get());
         level_set(NULL);
     }
+    if (playerMode == PLAYER_CUBE) {
+        GFC_TextLine shape_path;
+        snprintf(shape_path, GFCLINELEN, "images/player/shape%i.png", shape);
+        Sprite* shape_sprite;
+        player->sprite = gf2d_sprite_load_all(
+            shape_path,
+            64,
+            64,
+            1,
+            false);
+        player->center = gfc_vector2d(32, 32);
+        player->scale = gfc_vector2d(0.5, 0.5);
+    }
+    else {
+        player->center = gfc_vector2d(16, 16);
+        player->scale = gfc_vector2d(1, 1);
+    }
 }
 
 Entity* player_get() {
@@ -786,6 +810,8 @@ float player_charge_get() {
 
 void player_editor_draw(Entity* player) {
     if (!player) return;
+
+    player_draw(player);
 
     int size = 32;
 
@@ -929,36 +955,111 @@ void player_editor_draw(Entity* player) {
 }
 
 void player_draw(Entity* player) {
-    if (!player || !practiceMode) return;
-    GFC_Vector2D pos;
-    GFC_Vector2D scale = camera_get_zoom();
+    if (!player) return;
 
-    gfc_vector2d_add(pos, practiceCheckpointPos, camera_get_offset());
-    pos = gfc_vector2d_multiply(pos, scale);
+    if (practiceMode) {
+        GFC_Vector2D pos;
+        GFC_Vector2D scale = camera_get_zoom();
 
-    scale.x *= 0.5;
-    scale.y *= 0.5;
+        gfc_vector2d_add(pos, practiceCheckpointPos, camera_get_offset());
+        pos = gfc_vector2d_multiply(pos, scale);
 
-    Sprite* sprite;
+        scale.x *= 0.5;
+        scale.y *= 0.5;
 
-    sprite = gf2d_sprite_load_all(
-        "images/player/wave2.png",
-        32,
-        32,
+        Sprite* sprite;
+
+        sprite = gf2d_sprite_load_all(
+            "images/player/wave2.png",
+            32,
+            32,
+            1,
+            false);
+
+        GFC_Vector2D center = { 16, 16 };
+
+        gf2d_sprite_draw(
+            sprite,
+            pos,
+            &scale,
+            &center,
+            NULL,
+            NULL,
+            NULL,
+            0);
+    }
+
+    GFC_Vector2D flip = gfc_vector2d(0, gravityMult < 0);
+
+    // draw hat on player
+    GFC_Vector2D hat_pos;
+    GFC_Vector2D hat_scale = camera_get_zoom();
+
+    gfc_vector2d_add(hat_pos, player->pos, camera_get_offset());
+    hat_pos.y -= 16 * (gravityMult < 0 ? -1 : 1);
+    hat_pos.y -= abs(player->rotation) / 6 * (gravityMult < 0 ? -1 : 1);
+    hat_pos = gfc_vector2d_multiply(hat_pos, hat_scale);
+
+    GFC_TextLine hat_path;
+    snprintf(hat_path, GFCLINELEN, "images/player/hat%i.png", hat);
+    Sprite* hat_sprite;
+    hat_sprite = gf2d_sprite_load_all(
+        hat_path,
+        64,
+        64,
         1,
         false);
 
-    GFC_Vector2D center = { 16, 16 };
+    GFC_Vector2D hat_center = { 32, gravityMult < 0 ? 0 : 64 };
+    float hat_rotation = player->rotation / 3;
+
+    hat_scale.x *= 0.35;
+    hat_scale.y *= 0.35;
 
     gf2d_sprite_draw(
-        sprite,
-        pos,
-        &scale,
-        &center,
-        NULL,
-        NULL,
+        hat_sprite,
+        hat_pos,
+        &hat_scale,
+        &hat_center,
+        &hat_rotation,
+        &flip,
         NULL,
         0);
+
+    if (playerMode == PLAYER_CUBE || playerMode == PLAYER_BALL) {
+        // draw face on player
+        GFC_Vector2D face_pos;
+        GFC_Vector2D face_scale = camera_get_zoom();
+
+        gfc_vector2d_add(face_pos, player->pos, camera_get_offset());
+        face_pos = gfc_vector2d_multiply(face_pos, face_scale);
+
+        GFC_TextLine face_path;
+        snprintf(face_path, GFCLINELEN, "images/player/face%i.png", face);
+        Sprite* face_sprite;
+        face_sprite = gf2d_sprite_load_all(
+            face_path,
+            64,
+            64,
+            1,
+            false);
+
+        GFC_Vector2D face_center = { 32, 24 };
+        float face_rotation = player->rotation;
+
+        face_scale.x *= 0.35;
+        face_scale.y *= 0.35;
+
+        gf2d_sprite_draw(
+            face_sprite,
+            face_pos,
+            &face_scale,
+            &face_center,
+            &face_rotation,
+            &flip,
+            NULL,
+            0);
+    }
 }
 
 Uint8 player_editor_mode_get() {
@@ -969,6 +1070,7 @@ void player_editor_mode_set(Uint8 editor) {
     // slog("switching editor mode - %i", editor);
     editorMode = editor;
     if (editor) {
+        slowmo = false;
         player->think = player_editor_think;
         player->update = player_editor_update;
         player->draw = player_editor_draw;
@@ -983,7 +1085,7 @@ void player_editor_mode_set(Uint8 editor) {
 void player_add_coin(Uint8 index) {
     gfc_sound_play(coin_sfx, 0, 0.25f, 1);
     thisLevelCoins[index] = 1;
-    slog("collected coins in this level: [%i %i %i]", thisLevelCoins[0], thisLevelCoins[1], thisLevelCoins[2]);
+    // slog("collected coins in this level: [%i %i %i]", thisLevelCoins[0], thisLevelCoins[1], thisLevelCoins[2]);
 }
 
 Uint32 player_get_coin_count() {
@@ -1035,4 +1137,25 @@ Uint8 player_get_shield() {
 
 void player_break_shield() {
     if (iFrames < 0) iFrames = 100;
+}
+
+GFC_Vector4D player_get_customization() {
+    return gfc_vector4d(hat, face, shape, hue);
+}
+
+void player_set_customization(Uint8 h, Uint8 f, Uint8 s, float hu) {
+    hat = h;
+    face = f;
+    shape = s;
+    hue = hu;
+    player_get()->hue = hu;
+}
+
+Uint8 player_get_bullet() {
+    return bullet;
+}
+
+void player_set_bullet(Uint8 b) {
+    bullet = b;
+    snprintf(bullet_path, GFCLINELEN, "images/objects/bullet%i.png", b);
 }

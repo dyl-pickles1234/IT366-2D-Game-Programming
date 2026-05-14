@@ -20,6 +20,7 @@ typedef struct Entity_s {
     float rotation;
     Sprite* sprite;
     float frame;
+    float hue;
     void* data;
 
     void (*think) (struct Entity_s* self);

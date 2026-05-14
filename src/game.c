@@ -27,6 +27,11 @@
 #define SCREEN_X 1200
 #define SCREEN_Y 768
 
+#define beat_visualization false
+#define beat_visualization_song "audio/music/miku.wav"
+// #define beat_visualization_song "audio/music/blast.wav"
+// #define beat_visualization_song "audio/music/pig.wav"
+
 void delay(void* udata, Uint8* stream, int len) {
     // for (int i = len - 1; i >= 0; i -= 2) {
 
@@ -43,8 +48,6 @@ void delay(void* udata, Uint8* stream, int len) {
 int main(int argc, char* argv[])
 {
     /*variable declarations*/
-    Uint8 beat_visualization = false;
-
     int done = 0;
     int paused = 1;
     const Uint8* keys;
@@ -90,9 +93,7 @@ int main(int argc, char* argv[])
 
     GFC_List* beats = NULL;
     if (beat_visualization) {
-        // GFC_Sound* song = gfc_sound_load("audio/music/blast.wav", 1.0, 0);
-        GFC_Sound* song = gfc_sound_load("audio/music/miku.wav", 1.0, 0);
-        // GFC_Sound* song = gfc_sound_load("audio/music/pig.wav", 1.0, 0);
+        GFC_Sound* song = gfc_sound_load(beat_visualization_song, 1.0, 0);
         // slog("%i", SDL_GetTicks());
         beats = get_beats(song);
         // slog("%i", SDL_GetTicks());
@@ -232,6 +233,74 @@ int main(int argc, char* argv[])
             }
         }
 
+        if (window_get_active() == window_get("charactercreate")) {
+            Uint8 hat, face, shape;
+            float hue;
+            GFC_Vector4D customization = player_get_customization();
+            hat = customization.x;
+            face = customization.y;
+            shape = customization.z;
+            hue = customization.w;
+            Uint8 bullet = player_get_bullet();
+
+            Uint8 changed = false;
+            if (button_clicked_by_name("bullet_right")) {
+                changed = true;
+                bullet++;
+                bullet = bullet % 4;
+            }
+            if (button_clicked_by_name("bullet_left")) {
+                changed = true;
+                bullet = bullet < 1 ? 4 : bullet;
+                bullet--;
+            }
+            if (button_clicked_by_name("hat_right")) {
+                changed = true;
+                hat++;
+                hat = hat % 4;
+            }
+            if (button_clicked_by_name("hat_left")) {
+                changed = true;
+                hat = hat < 1 ? 4 : hat;
+                hat--;
+            }
+            if (button_clicked_by_name("face_right")) {
+                changed = true;
+                face++;
+                face = face % 4;
+            }
+            if (button_clicked_by_name("face_left")) {
+                changed = true;
+                face = face < 1 ? 4 : face;
+                face--;
+            }
+            if (button_clicked_by_name("shape_right")) {
+                changed = true;
+                shape++;
+                shape = shape % 4;
+            }
+            if (button_clicked_by_name("shape_left")) {
+                changed = true;
+                shape = shape < 1 ? 4 : shape;
+                shape--;
+            }
+            if (button_clicked_by_name("color_right")) {
+                changed = true;
+                hue += 36;
+                if (hue >= 360) hue -= 360;
+            }
+            if (button_clicked_by_name("color_left")) {
+                changed = true;
+                hue -= 36;
+                if (hue < 0) hue += 360;
+            }
+
+            if (changed) {
+                player_set_customization(hat, face, shape, hue);
+                player_set_bullet(bullet);
+            }
+        }
+
         if (window_get_active() == window_get("shop")) {
             snprintf(text_find("coin_text", window_get_active()->UIElements)->text, GFCLINELEN, "Coins: %i", player_get_coin_count());
             for (int i = 0; i < 5; i++) {
@@ -273,6 +342,11 @@ int main(int argc, char* argv[])
             // shop button
             if (button_clicked_by_name("shop_button")) {
                 window_set_active(window_get("shop"));
+            }
+
+            // creator button
+            if (button_clicked_by_name("create_button")) {
+                window_set_active(window_get("charactercreate"));
             }
 
             if (button_clicked_by_name("level_button")) {
@@ -322,6 +396,138 @@ int main(int argc, char* argv[])
             0);
 
         window_draw(window_get_active());
+
+        if (window_get_active() == window_get("charactercreate")) {
+            Uint8 hat, face, shape;
+            float hue;
+            GFC_Vector4D customization = player_get_customization();
+            hat = customization.x;
+            face = customization.y;
+            shape = customization.z;
+            hue = customization.w;
+
+            Entity* player = player_get();
+
+            GFC_Vector2D pos = gfc_vector2d(600, 450);
+            GFC_Vector2D scale = gfc_vector2d(5, 5);
+
+            // draw bullet
+            GFC_Vector2D bullet_pos = gfc_vector2d(600, 150);
+            GFC_Vector2D bullet_scale = gfc_vector2d(2.5, 2.5);
+
+            GFC_TextLine bullet_path;
+            snprintf(bullet_path, GFCLINELEN, "images/objects/bullet%i.png", player_get_bullet());
+            Sprite* bullet_sprite;
+            bullet_sprite = gf2d_sprite_load_all(
+                bullet_path,
+                32,
+                32,
+                1,
+                false);
+
+            GFC_Vector2D bullet_center = { 16, 16 };
+
+            gf2d_sprite_draw(
+                bullet_sprite,
+                bullet_pos,
+                &bullet_scale,
+                &bullet_center,
+                NULL,
+                NULL,
+                NULL,
+                0);
+
+            // draw hat on player
+            GFC_Vector2D hat_pos = pos;
+            GFC_Vector2D hat_scale = scale;
+
+            hat_pos.y -= 16 * scale.y;
+
+            GFC_TextLine hat_path;
+            snprintf(hat_path, GFCLINELEN, "images/player/hat%i.png", hat);
+            Sprite* hat_sprite;
+            hat_sprite = gf2d_sprite_load_all(
+                hat_path,
+                64,
+                64,
+                1,
+                false);
+
+            GFC_Vector2D hat_center = { 32, 64 };
+
+            hat_scale.x *= 0.35;
+            hat_scale.y *= 0.35;
+
+            gf2d_sprite_draw(
+                hat_sprite,
+                hat_pos,
+                &hat_scale,
+                &hat_center,
+                NULL,
+                NULL,
+                NULL,
+                0);
+
+            // draw shape of player
+            GFC_Vector2D shape_pos = pos;
+            GFC_Vector2D shape_scale = scale;
+
+            GFC_TextLine shape_path;
+            snprintf(shape_path, GFCLINELEN, "images/player/shape%i.png", shape);
+            Sprite* shape_sprite;
+            shape_sprite = gf2d_sprite_load_all(
+                shape_path,
+                64,
+                64,
+                1,
+                false);
+
+            GFC_Vector2D shape_center = { 32, 32 };
+
+            GFC_Color col = gfc_color_hsl(hue, 0.5, 0.5, 1);
+
+            shape_scale.x *= 0.5;
+            shape_scale.y *= 0.5;
+
+            gf2d_sprite_draw(
+                shape_sprite,
+                shape_pos,
+                &shape_scale,
+                &shape_center,
+                NULL,
+                NULL,
+                hue ? &col : NULL,
+                0);
+
+            // draw face on player
+            GFC_Vector2D face_pos = pos;
+            GFC_Vector2D face_scale = scale;
+
+            GFC_TextLine face_path;
+            snprintf(face_path, GFCLINELEN, "images/player/face%i.png", face);
+            Sprite* face_sprite;
+            face_sprite = gf2d_sprite_load_all(
+                face_path,
+                64,
+                64,
+                1,
+                false);
+
+            GFC_Vector2D face_center = { 32, 24 };
+
+            face_scale.x *= 0.35;
+            face_scale.y *= 0.35;
+
+            gf2d_sprite_draw(
+                face_sprite,
+                face_pos,
+                &face_scale,
+                &face_center,
+                NULL,
+                NULL,
+                NULL,
+                0);
+        }
 
         snprintf(FPS_string, 8, "%.1f", gf2d_graphics_get_frames_per_second());
         text_draw_raw(FPS_string, 32, 32, 32, GFC_COLOR_WHITE);

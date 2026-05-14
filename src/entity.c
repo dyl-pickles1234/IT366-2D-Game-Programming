@@ -75,6 +75,8 @@ void entity_draw(Entity* ent) {
     scale.x *= ent->scale.x;
     scale.y *= ent->scale.y;
 
+    GFC_Color col = gfc_color_hsl(ent->hue, 0.5, 0.5, 1);
+
     gf2d_sprite_draw(
         ent->sprite,
         pos,
@@ -82,7 +84,7 @@ void entity_draw(Entity* ent) {
         &ent->center,
         &ent->rotation,
         NULL,
-        NULL,
+        ent->hue ? &col : NULL,
         (Uint32)ent->frame);
 
     // // debug draw all hitboxes

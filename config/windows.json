@@ -129,9 +129,17 @@
                 },
                 {
                     "type": "button",
+                    "name": "create_button",
+                    "icon": "",
+                    "centeredOn": [ 500, 568 ],
+                    "size": [ 100, 100 ],
+                    "label": "Character Creator"
+                },
+                {
+                    "type": "button",
                     "name": "shop_button",
                     "icon": "",
-                    "pos": [ 550, 568 ],
+                    "centeredOn": [ 700, 568 ],
                     "size": [ 100, 100 ],
                     "label": "Shop"
                 }
@@ -165,6 +173,101 @@
                     "text": "Level Editor",
                     "size": 24,
                     "centeredOn": [ 600, 10 ]
+                }
+            ]
+        },
+        {
+            "name": "charactercreate",
+            "background": "images/backgrounds/geometrydash.png",
+            "pos": [ 0, 0 ],
+            "size": [ 1200, 768 ],
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "creator_title",
+                    "text": "Customize Your Block!",
+                    "size": 36,
+                    "centeredOn": [ 600, 10 ]
+                },
+                {
+                    "type": "button",
+                    "name": "bullet_left",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 350, 150 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "bullet_right",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 850, 150 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "hat_left",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 300, 300 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "hat_right",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 900, 300 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "face_left",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 300, 400 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "face_right",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 900, 400 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "shape_left",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 300, 500 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "shape_right",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 900, 500 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "color_left",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 300, 600 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "color_right",
+                    "icon": "images/ui/play.png",
+                    "centeredOn": [ 900, 600 ],
+                    "size": [ 100, 100 ],
+                    "label": ""
                 }
             ]
         }
