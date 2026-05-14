@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     gf2d_sprite_init(1024);
     entity_manager_init(1024);
     SDL_ShowCursor(SDL_DISABLE);
-    text_init();
+    ui_init();
 
     // gotta do some wacky stuff to get audio right
     gfc_sound_init_config("config/audio.cfg");
@@ -136,47 +136,22 @@ int main(int argc, char* argv[])
         false);
 
     // UI setup
-    // UIButton* pauseButton = button_new("pause_button", NULL, 0, 0, 100, 100, NULL);
+    window_load_all("config/windows.json");
+    GFC_TextWord upgradeButtonName;
+    GFC_TextLine costLabelName;
+    for (int i = 0; i < 5; i++) {
+        snprintf(upgradeButtonName, GFCLINELEN, "upgrade_button%i", i + 1);
+        player_get_upgrade_name(i, button_find(upgradeButtonName, window_get("shop")->UIElements)->label->text);
 
-    UIWindow* editorUI = window_new("editor_ui", NULL, 0, 0, SCREEN_X, SCREEN_Y);
-    UIText* editorText = text_new("editor_title", "Level Editor", 18, SCREEN_X / 2 - 6 * 8, 10, GFC_COLOR_WHITE);
-    gfc_list_append(editorUI->UIElements, editorText);
-
-    UIWindow* mainMenu = window_new("main_menu", "images/backgrounds/main_menu.jpg", 0, 0, SCREEN_X, SCREEN_Y);
-    // UIText* titleText = text_new("title", GAME_TITLE, 36, text_center(GAME_TITLE, 36, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
-    UIButton* startButton = button_new("start_button", NULL, SCREEN_X / 2 - 75, SCREEN_Y / 2 - 75, 150, 150, NULL);
-    // gfc_list_append(mainMenu->UIElements, titleText);
-    gfc_list_append(mainMenu->UIElements, startButton);
-
-    UIWindow* levelSelect = window_new("level_select", "images/ui/level_select.png", 0, 0, SCREEN_X, SCREEN_Y);
-    // UIText* levelText = text_new("level_title", "<placeholder>", 64, text_center("<placeholder>", 64, 0, SCREEN_X), 150, GFC_COLOR_WHITE);
-    UIButton* levelButton = button_new("level_button", NULL, 274, 150, 652, 200, "<placeholder>");
-    UIButton* leftButton = button_new("left_button", "images/ui/play.png", 62, SCREEN_Y / 2 - 75, 150, 150, NULL);
-    UIButton* rightButton = button_new("right_button", "images/ui/play.png", SCREEN_X - 62 - 150, SCREEN_Y / 2 - 75, 150, 150, NULL);
-    UIButton* shopButton = button_new("shop_button", NULL, SCREEN_X / 2 - 50, SCREEN_Y - 200, 100, 100, "Shop");
-    // gfc_list_append(levelSelect->UIElements, levelText);
-    gfc_list_append(levelSelect->UIElements, levelButton);
-    gfc_list_append(levelSelect->UIElements, leftButton);
-    gfc_list_append(levelSelect->UIElements, rightButton);
-    gfc_list_append(levelSelect->UIElements, shopButton);
-
-    UIWindow* shopMenu = window_new("shop", "images/backgrounds/geometrydash.png", 0, 0, SCREEN_X, SCREEN_Y);
-    UIText* shopText = text_new("shop_title", "Purchase Upgrades", 48, text_center("Purchase Upgrades", 48, 0, SCREEN_X), 50, GFC_COLOR_WHITE);
-    UIText* coinText = text_new("coin_text", "Coins: ", 36, text_center("Coins: ", 36, 0, SCREEN_X), 150, GFC_COLOR_WHITE);
-    UIButton* upgradeButton1 = button_new("upgrade_button1", NULL, SCREEN_X / 5 - SCREEN_X / 10, 450, 100, 100, "Upgrade 1");
-    UIText* costText1 = text_new("cost_text1", "Cost: ", 24, SCREEN_X / 5 - SCREEN_X / 10, 550, GFC_COLOR_WHITE);
-    snprintf(costText1->text, GFCLINELEN, "Cost: %i", player_get_upgrade_cost(UPGRADE_1));
-    // gfc_list_append(levelSelect->UIElements, levelText);
-    gfc_list_append(shopMenu->UIElements, shopText);
-    gfc_list_append(shopMenu->UIElements, coinText);
-    gfc_list_append(shopMenu->UIElements, upgradeButton1);
-    gfc_list_append(shopMenu->UIElements, costText1);
+        snprintf(costLabelName, GFCLINELEN, "cost_text%i", i + 1);
+        snprintf(text_find(costLabelName, window_get("shop")->UIElements)->text, GFCLINELEN, "Cost: %i", player_get_upgrade_cost(i));
+    }
 
     if (beat_visualization) {
-        window_set_active(editorUI);
+        window_set_active(window_get("editor_ui"));
     }
     else {
-        window_set_active(mainMenu);
+        window_set_active(window_get("main_menu"));
     }
 
     slog("press [ctrl+q] to quit");
@@ -235,32 +210,34 @@ int main(int argc, char* argv[])
 
         if (!level_get() && !window_get_active()) {
             selectedLevel = -1;
-            window_set_active(levelSelect);
+            window_set_active(window_get("level_select"));
         }
 
-        if (window_get_active() == mainMenu) {
+        if (window_get_active() == window_get("main_menu")) {
             if (button_clicked_by_name("start_button")) {
-                window_set_active(levelSelect);
+                window_set_active(window_get("level_select"));
             }
         }
 
-        if (window_get_active() == shopMenu) {
-            snprintf(coinText->text, GFCLINELEN, "Coins: %i", player_get_coin_count());
-            if (player_owns_upgrade(UPGRADE_1)) {
-                gfc_line_cpy(button_find("upgrade_button1", shopMenu->UIElements)->label->text, "Purchased");
-                gfc_line_cpy(text_find("cost_text1", shopMenu->UIElements)->text, " ");
-            }
-            else if (button_clicked_by_name("upgrade_button1") && player_get_coin_count() > player_get_upgrade_cost(UPGRADE_1)) {
-                player_buy_upgrade(UPGRADE_1);
+        if (window_get_active() == window_get("shop")) {
+            snprintf(text_find("coin_text", window_get_active()->UIElements)->text, GFCLINELEN, "Coins: %i", player_get_coin_count());
+            for (int i = 0; i < 5; i++) {
+                GFC_TextLine buttonName;
+                GFC_TextLine costLabelName;
+                snprintf(buttonName, GFCLINELEN, "upgrade_button%i", i + 1);
+                snprintf(costLabelName, GFCLINELEN, "cost_text%i", i + 1);
+
+                if (player_owns_upgrade(i)) {
+                    gfc_line_cpy(button_find(buttonName, window_get("shop")->UIElements)->label->text, "Purchased");
+                    gfc_line_cpy(text_find(costLabelName, window_get("shop")->UIElements)->text, " ");
+                }
+                else if (button_clicked_by_name(buttonName) && player_get_coin_count() >= player_get_upgrade_cost(i)) {
+                    player_buy_upgrade(i);
+                }
             }
         }
 
-        if (window_get_active() == levelSelect && selectedLevel == -1) {
-            // shop button
-            if (button_clicked_by_name("shop_button")) {
-                window_set_active(shopMenu);
-            }
-
+        if (window_get_active() == window_get("level_select") && selectedLevel == -1) {
             // cycle levels
             if (button_clicked_by_name("right_button")) {
                 levelID++;
@@ -274,10 +251,16 @@ int main(int argc, char* argv[])
 
             // display level name
             char* level_name = gfc_list_get_nth(levels, levelID);
+            UIButton* levelButton = button_find("level_button", window_get_active()->UIElements);
             strcpy(levelButton->label->text, level_name);
             levelButton->label->pos.x = text_center(level_name, levelButton->label->fontSize, 0, SCREEN_X);
 
             // gf2d_font_draw_line_tag(levelDisplay, FT_Normal, GFC_COLOR_WHITE, gfc_vector2d(1280 / 2 - 150 / 2, 400));
+
+            // shop button
+            if (button_clicked_by_name("shop_button")) {
+                window_set_active(window_get("shop"));
+            }
 
             if (button_clicked_by_name("level_button")) {
                 selectedLevel = levelID;
@@ -293,7 +276,7 @@ int main(int argc, char* argv[])
 
                 level_set(level_load(level_path));
 
-                player_editor_mode_get() ? window_set_active(editorUI) : window_set_active(NULL);
+                player_editor_mode_get() ? window_set_active(window_get("editor_ui")) : window_set_active(NULL);
                 player_reset_no_sound();
                 camera_center_on(player_get()->pos);
                 paused = 0;
@@ -369,7 +352,7 @@ int main(int argc, char* argv[])
             player_editor_mode_set(player_editor_mode_get() == 1 ? 0 : 1);
 
             if (player_editor_mode_get()) {
-                window_set_active(editorUI);
+                window_set_active(window_get("editor_ui"));
             }
             else {
                 // player_reset_no_sound();
@@ -382,7 +365,7 @@ int main(int argc, char* argv[])
             level_free(level_get());
             level_set(NULL);
             selectedLevel = -1;
-            window_set_active(levelSelect);
+            window_set_active(window_get("level_select"));
         }
         // slog("Rendering at %f FPS", gf2d_graphics_get_frames_per_second());
     }

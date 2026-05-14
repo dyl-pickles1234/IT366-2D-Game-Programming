@@ -23,7 +23,7 @@
 #define SHIP_GRAVITY 0.13
 #define UFO_GRAVITY 0.1
 
-#define MAX_CHARGE 60
+#define MAX_CHARGE 150
 #define PRACTICE_TIMER 150
 
 static Entity* player = NULL;
@@ -49,16 +49,15 @@ static PlayerMode practiceCheckpointMode = PLAYER_CUBE;
 
 GFC_Sound* die_sfx;
 GFC_Sound* win_sfx;
+GFC_Sound* coin_sfx;
 
 GFC_HashMap* levelCoins;
 Uint8* thisLevelCoins;
 Uint32 coinsSpent = 0;
 
-// costs for upgrades (will be data-driven eventually)
-Uint8 upgradeCosts[5] = { 2, 2, 2, 2, 2 };
+GFC_List* upgrades;
 
-// whether each upgrade is unlocked
-Uint8 upgrades[5] = { 0, 0, 0, 0, 0 };
+void upgrades_load(const char* filepath);
 
 void player_entity_new(GFC_Vector2D pos) {
     Entity* self;
@@ -87,9 +86,44 @@ void player_entity_new(GFC_Vector2D pos) {
 
     die_sfx = gfc_sound_load("audio/sfx/die.wav", 1.0f, 0);
     win_sfx = gfc_sound_load("audio/sfx/victory.wav", 1.0f, 0);
+    coin_sfx = gfc_sound_load("audio/sfx/coin.wav", 1.0f, 0);
 
     levelCoins = gfc_hashmap_new();
     thisLevelCoins = gfc_allocate_array(sizeof(Uint8), 3);
+
+    upgrades = gfc_list_new_size(5);
+
+    upgrades_load("config/upgrades.json");
+}
+
+void upgrades_load(const char* filepath) {
+    SJson* upgradesConfigFile = sj_load(filepath);
+    SJson* upgradesJson = sj_object_get_value(upgradesConfigFile, "upgrades");
+
+    SJson* upgradeJson;
+    for (int i = 0; i < sj_array_get_count(upgradesJson); i++) {
+        upgradeJson = sj_array_get_nth(upgradesJson, i);
+
+        // upgrade properties
+        SJson* nameJson = sj_object_get_value(upgradeJson, "name");
+        SJson* costJson = sj_object_get_value(upgradeJson, "cost");
+
+        // actual values
+        const char* upgradeName = sj_get_string_value(nameJson);
+
+        int cost;
+        sj_get_integer_value(costJson, &cost);
+
+        // create upgrade
+        Upgrade* upgrade = gfc_allocate_array(sizeof(Upgrade), 1);
+        gfc_word_cpy(upgrade->name, upgradeName);
+        upgrade->cost = cost;
+        upgrade->purchased = false;
+
+        gfc_list_append(upgrades, upgrade);
+    }
+
+    sj_free(upgradesConfigFile);
 }
 
 void player_editor_think() {
@@ -263,7 +297,7 @@ void player_think() {
     GFC_Vector2D move = { 0 };
 
     // movement can only happen with upgrade
-    if (upgrades[UPGRADE_1]) {
+    if (((Upgrade*)gfc_list_get_nth(upgrades, UPGRADE_1))->purchased) {
         move.x += player->speed * gfc_input_key_down("d");
         move.x -= player->speed * gfc_input_key_down("a");
     }
@@ -543,7 +577,7 @@ void player_think() {
         break;
     }
 
-    if (charge < MAX_CHARGE) charge++;
+    if (charge < MAX_CHARGE) charge += player_owns_upgrade(UPGRADE_2) ? 2 : 1;
     if (practiceTimer > 0) practiceTimer--;
 }
 
@@ -917,6 +951,7 @@ void player_editor_mode_set(Uint8 editor) {
 }
 
 void player_add_coin(Uint8 index) {
+    gfc_sound_play(coin_sfx, 0, 0.25f, 1);
     thisLevelCoins[index] = 1;
     slog("collected coins in this level: [%i %i %i]", thisLevelCoins[0], thisLevelCoins[1], thisLevelCoins[2]);
 }
@@ -942,15 +977,20 @@ GFC_HashMap* player_get_level_coins() {
 }
 
 Uint8 player_owns_upgrade(UpgradeType upgrade) {
-    return upgrades[upgrade];
+    return ((Upgrade*)gfc_list_get_nth(upgrades, upgrade))->purchased;
 }
 
 void player_buy_upgrade(UpgradeType upgrade) {
-    upgrades[upgrade] = 1;
-    coinsSpent += upgradeCosts[upgrade];
+    Upgrade* upgradeObj = gfc_list_get_nth(upgrades, upgrade);
+    upgradeObj->purchased = 1;
+    coinsSpent += upgradeObj->cost;
     slog("Coins remaining: %i", player_get_coin_count());
 }
 
 Uint8 player_get_upgrade_cost(UpgradeType upgrade) {
-    return upgradeCosts[upgrade];
+    return ((Upgrade*)gfc_list_get_nth(upgrades, upgrade))->cost;
+}
+
+void player_get_upgrade_name(UpgradeType upgrade, char* textOut) {
+    gfc_word_cpy(textOut, ((Upgrade*)gfc_list_get_nth(upgrades, upgrade))->name);
 }

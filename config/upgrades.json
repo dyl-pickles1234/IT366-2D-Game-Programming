@@ -1,0 +1,25 @@
+{
+    "upgrades":
+    [
+        {
+            "name": "Movement",
+            "cost": 2
+        },
+        {
+            "name": "Cooldown",
+            "cost": 3
+        },
+        {
+            "name": "Upgrade3",
+            "cost": 1
+        },
+        {
+            "name": "Upgrade4",
+            "cost": 1
+        },
+        {
+            "name": "Upgrade5",
+            "cost": 1
+        }
+    ]
+}

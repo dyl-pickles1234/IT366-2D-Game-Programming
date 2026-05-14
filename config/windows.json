@@ -1,0 +1,172 @@
+{
+    "windows": [
+        {
+            "name": "shop",
+            "background": "images/backgrounds/geometrydash.png",
+            "pos": [ 0, 0 ],
+            "size": [ 1200, 768 ],
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "shop_title",
+                    "text": "Purchase Upgrades",
+                    "size": 48,
+                    "centeredOn": [ 600, 50 ]
+                },
+                {
+                    "type": "text",
+                    "name": "coin_text",
+                    "text": "Coins: ",
+                    "size": 36,
+                    "centeredOn": [ 600, 150 ]
+                },
+                {
+                    "type": "button",
+                    "name": "upgrade_button1",
+                    "icon": "",
+                    "centeredOn": [ 200, 450 ],
+                    "size": [ 100, 100 ],
+                    "label": "Upgrade 1"
+                },
+                {
+                    "type": "text",
+                    "name": "cost_text1",
+                    "text": "Cost: ",
+                    "size": 24,
+                    "centeredOn": [ 200, 550 ]
+                },
+                {
+                    "type": "button",
+                    "name": "upgrade_button2",
+                    "icon": "",
+                    "centeredOn": [ 400, 450 ],
+                    "size": [ 100, 100 ],
+                    "label": "Upgrade 2"
+                },
+                {
+                    "type": "text",
+                    "name": "cost_text2",
+                    "text": "Cost: ",
+                    "size": 24,
+                    "centeredOn": [ 400, 550 ]
+                },
+                {
+                    "type": "button",
+                    "name": "upgrade_button3",
+                    "icon": "",
+                    "centeredOn": [ 600, 450 ],
+                    "size": [ 100, 100 ],
+                    "label": "Upgrade 3"
+                },
+                {
+                    "type": "text",
+                    "name": "cost_text3",
+                    "text": "Cost: ",
+                    "size": 24,
+                    "centeredOn": [ 600, 550 ]
+                },
+                {
+                    "type": "button",
+                    "name": "upgrade_button4",
+                    "icon": "",
+                    "centeredOn": [ 800, 450 ],
+                    "size": [ 100, 100 ],
+                    "label": "Upgrade 4"
+                },
+                {
+                    "type": "text",
+                    "name": "cost_text4",
+                    "text": "Cost: ",
+                    "size": 24,
+                    "centeredOn": [ 800, 550 ]
+                },
+                {
+                    "type": "button",
+                    "name": "upgrade_button5",
+                    "icon": "",
+                    "centeredOn": [ 1000, 450 ],
+                    "size": [ 100, 100 ],
+                    "label": "Upgrade 5"
+                },
+                {
+                    "type": "text",
+                    "name": "cost_text5",
+                    "text": "Cost: ",
+                    "size": 24,
+                    "centeredOn": [ 1000, 550 ]
+                }
+            ]
+        },
+        {
+            "name": "level_select",
+            "background": "images/ui/level_select.png",
+            "pos": [ 0, 0 ],
+            "size": [ 1200, 768 ],
+            "elements": [
+                {
+                    "type": "button",
+                    "name": "level_button",
+                    "icon": "",
+                    "pos": [ 274, 150 ],
+                    "size": [ 652, 200 ],
+                    "label": "<placeholder>"
+                },
+                {
+                    "type": "button",
+                    "name": "left_button",
+                    "icon": "images/ui/play.png",
+                    "pos": [ 62, 309 ],
+                    "size": [ 150, 150 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "right_button",
+                    "icon": "images/ui/play.png",
+                    "pos": [ 988, 309 ],
+                    "size": [ 150, 150 ],
+                    "label": ""
+                },
+                {
+                    "type": "button",
+                    "name": "shop_button",
+                    "icon": "",
+                    "pos": [ 550, 568 ],
+                    "size": [ 100, 100 ],
+                    "label": "Shop"
+                }
+            ]
+        },
+        {
+            "name": "main_menu",
+            "background": "images/backgrounds/main_menu.jpg",
+            "pos": [ 0, 0 ],
+            "size": [ 1200, 768 ],
+            "elements": [
+                {
+                    "type": "button",
+                    "name": "start_button",
+                    "icon": "",
+                    "pos": [ 525, 309 ],
+                    "size": [ 150, 150 ],
+                    "label": ""
+                }
+            ]
+        },
+        {
+            "name": "editor_ui",
+            "background": "",
+            "pos": [ 0, 0 ],
+            "size": [ 1200, 768 ],
+            "elements": [
+                {
+                    "type": "text",
+                    "name": "editor_title",
+                    "text": "Level Editor",
+                    "size": 24,
+                    "centeredOn": [ 600, 10 ]
+                }
+            ]
+        }
+    ]
+}

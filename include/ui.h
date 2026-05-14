@@ -35,16 +35,16 @@ typedef struct {
     UIText* label;
 } UIButton;
 
-void text_init();
+void ui_init();
 
 UIText* text_new(const char* name, const char* text, float size, int x, int y, GFC_Color col);
 void text_free(UIText* text);
 void text_draw(UIText* text);
 void text_draw_raw(const char* text, float size, int x, int y, GFC_Color col);
-float text_center(char* text, int size, float min, float max);
+float text_center(const char* text, int size, float min, float max);
 UIText* text_find(const char* name, GFC_List* elements);
 
-UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, char* label);
+UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w, int h, const char* label);
 void button_free(UIButton* button);
 void button_draw(UIButton* button);
 Uint8 button_clicked(UIButton* button);
@@ -56,4 +56,5 @@ void window_free(UIWindow* window);
 void window_draw(UIWindow* window);
 void window_set_active(UIWindow* window);
 UIWindow* window_get_active();
-UIWindow* window_load(const char* filepath);
+UIWindow* window_get(const char* name);
+void window_load_all(const char* filepath);

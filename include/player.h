@@ -28,6 +28,12 @@ typedef enum {
     UPGRADE_5
 } UpgradeType;
 
+typedef struct {
+    GFC_TextWord name;
+    int cost;
+    Uint8 purchased;
+} Upgrade;
+
 void player_entity_new(GFC_Vector2D pos);
 void player_think();
 void player_update();
@@ -59,5 +65,6 @@ GFC_HashMap* player_get_level_coins();
 Uint8 player_owns_upgrade(UpgradeType upgrade);
 void player_buy_upgrade(UpgradeType upgrade);
 Uint8 player_get_upgrade_cost(UpgradeType upgrade);
+void player_get_upgrade_name(UpgradeType upgrade, char* textOut);
 
 #endif
