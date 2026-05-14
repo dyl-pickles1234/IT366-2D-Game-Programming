@@ -75,7 +75,7 @@ UIButton* button_new(const char* name, const char* iconPath, int x, int y, int w
 
     uiButton->type = UI_BUTTON;
     gfc_word_cpy(uiButton->name, name);
-    uiButton->icon = gf2d_sprite_load_all(iconPath, 32, 32, 1, false);
+    uiButton->icon = gf2d_sprite_load_image(iconPath);
     uiButton->bounds = gfc_rect(x, y, w, h);
     if (label) uiButton->label = text_new(name, label, uiButton->bounds.h / 4, text_center(label, uiButton->bounds.h / 4, x, x + w), y + h / 3, GFC_COLOR_WHITE);
 
@@ -97,13 +97,28 @@ Uint8 button_clicked(UIButton* button) {
 
 void button_draw(UIButton* button) {
     // draw icon
-    if (button->icon) gf2d_sprite_draw(button->icon, gfc_vector2d(button->bounds.x, button->bounds.y), NULL, NULL, NULL, NULL, NULL, 0);
+    if (button->icon) {
+        GFC_Vector2D pos = { button->bounds.x, button->bounds.y };
+        pos.x += button->bounds.w / 2;
+        pos.y += button->bounds.h / 2;
 
+        GFC_Vector2D center = { button->icon->frame_w / 2,button->icon->frame_h / 2 };
+        GFC_Vector2D scale = { button->bounds.w / button->icon->frame_w, button->bounds.h / button->icon->frame_h };
+        gf2d_sprite_draw(
+            button->icon,
+            pos,
+            &scale,
+            &center,
+            NULL,
+            NULL,
+            NULL,
+            0);
+    }
     // draw label
     if (button->label && strlen(button->label->text) > 0) text_draw(button->label);
 
     // //debug draw bounds
-    gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
+    // gf2d_draw_rect(button->bounds, GFC_COLOR_MAGENTA);
 }
 
 UIButton* button_find(const char* name, GFC_List* elements) {

@@ -23,9 +23,9 @@
                 {
                     "type": "button",
                     "name": "upgrade_button1",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 200, 450 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 150, 100 ],
                     "label": "Upgrade 1"
                 },
                 {
@@ -38,9 +38,9 @@
                 {
                     "type": "button",
                     "name": "upgrade_button2",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 400, 450 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 150, 100 ],
                     "label": "Upgrade 2"
                 },
                 {
@@ -53,9 +53,9 @@
                 {
                     "type": "button",
                     "name": "upgrade_button3",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 600, 450 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 150, 100 ],
                     "label": "Upgrade 3"
                 },
                 {
@@ -68,9 +68,9 @@
                 {
                     "type": "button",
                     "name": "upgrade_button4",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 800, 450 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 150, 100 ],
                     "label": "Upgrade 4"
                 },
                 {
@@ -83,9 +83,9 @@
                 {
                     "type": "button",
                     "name": "upgrade_button5",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 1000, 450 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 150, 100 ],
                     "label": "Upgrade 5"
                 },
                 {
@@ -114,7 +114,7 @@
                 {
                     "type": "button",
                     "name": "left_button",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "pos": [ 62, 309 ],
                     "size": [ 150, 150 ],
                     "label": ""
@@ -122,7 +122,7 @@
                 {
                     "type": "button",
                     "name": "right_button",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "pos": [ 988, 309 ],
                     "size": [ 150, 150 ],
                     "label": ""
@@ -130,16 +130,16 @@
                 {
                     "type": "button",
                     "name": "create_button",
-                    "icon": "",
+                    "icon": "images/ui/button.png",
                     "centeredOn": [ 500, 568 ],
-                    "size": [ 100, 100 ],
+                    "size": [ 250, 100 ],
                     "label": "Character Creator"
                 },
                 {
                     "type": "button",
                     "name": "shop_button",
-                    "icon": "",
-                    "centeredOn": [ 700, 568 ],
+                    "icon": "images/ui/button.png",
+                    "centeredOn": [ 750, 568 ],
                     "size": [ 100, 100 ],
                     "label": "Shop"
                 }
@@ -192,7 +192,7 @@
                 {
                     "type": "button",
                     "name": "bullet_left",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "centeredOn": [ 350, 150 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -200,7 +200,7 @@
                 {
                     "type": "button",
                     "name": "bullet_right",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "centeredOn": [ 850, 150 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -208,7 +208,7 @@
                 {
                     "type": "button",
                     "name": "hat_left",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "centeredOn": [ 300, 300 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -216,7 +216,7 @@
                 {
                     "type": "button",
                     "name": "hat_right",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "centeredOn": [ 900, 300 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -224,7 +224,7 @@
                 {
                     "type": "button",
                     "name": "face_left",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "centeredOn": [ 300, 400 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -232,7 +232,7 @@
                 {
                     "type": "button",
                     "name": "face_right",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "centeredOn": [ 900, 400 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -240,7 +240,7 @@
                 {
                     "type": "button",
                     "name": "shape_left",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "centeredOn": [ 300, 500 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -248,7 +248,7 @@
                 {
                     "type": "button",
                     "name": "shape_right",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "centeredOn": [ 900, 500 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -256,7 +256,7 @@
                 {
                     "type": "button",
                     "name": "color_left",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/left.png",
                     "centeredOn": [ 300, 600 ],
                     "size": [ 100, 100 ],
                     "label": ""
@@ -264,7 +264,7 @@
                 {
                     "type": "button",
                     "name": "color_right",
-                    "icon": "images/ui/play.png",
+                    "icon": "images/ui/right.png",
                     "centeredOn": [ 900, 600 ],
                     "size": [ 100, 100 ],
                     "label": ""

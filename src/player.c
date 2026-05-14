@@ -14,6 +14,7 @@
 #include "player.h"
 
 #define PLAYER_SPEED 1
+#define PLAYER_EDITOR_SPEED 3
 
 #define CUBE_JUMP_SPEED 5.05
 #define SHIP_BOOST_SPEED 0.275
@@ -275,10 +276,10 @@ void player_editor_think() {
 
 
     if (gfc_input_key_down("LSHIFT")) {
-        player->speed = PLAYER_SPEED * 5;
+        player->speed = PLAYER_EDITOR_SPEED * 5;
     }
     else {
-        player->speed = PLAYER_SPEED;
+        player->speed = PLAYER_EDITOR_SPEED;
     }
 
     if (gfc_input_key_pressed("TAB")) {
@@ -689,7 +690,7 @@ void player_update() {
     // cameraFocus.x += 125;
     // cameraFocus.y += 100 * gravityMult;
     if (playerMode != PLAYER_CUBE) {
-        // cameraFocus.y = camera_get_center().y;
+        cameraFocus.y = camera_get_center().y + 2;
     }
 
     camera_center_on(cameraFocus);
@@ -747,7 +748,7 @@ void player_reset_no_sound() {
     }
     else {
         player->pos.x = 100;
-        player->pos.y = level_get()->height * 32 - 32.1f;
+        player->pos.y = level_get()->height * 32 - 32 - 16;
         player->onGround = true;
         gravityMult = 1;
         flipped = 0;

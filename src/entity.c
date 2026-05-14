@@ -4,6 +4,7 @@
 
 #include "camera.h"
 #include "entity.h"
+#include "player.h"
 
 typedef struct {
     Entity* entityList;
@@ -77,13 +78,15 @@ void entity_draw(Entity* ent) {
 
     GFC_Color col = gfc_color_hsl(ent->hue, 0.5, 0.5, 1);
 
+    GFC_Vector2D flip = { 0, 1 };
+
     gf2d_sprite_draw(
         ent->sprite,
         pos,
         &scale,
         &ent->center,
         &ent->rotation,
-        NULL,
+        player_gravity_get() < 0 ? &flip : NULL,
         ent->hue ? &col : NULL,
         (Uint32)ent->frame);
 
